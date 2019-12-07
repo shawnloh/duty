@@ -1,0 +1,13 @@
+{
+  "name": "guard_duty",
+  "version": "1.0.0",
+  "description": "a program to generate guard duty names",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shawn Loh",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
