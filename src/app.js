@@ -1,12 +1,13 @@
-const express = require('express');
-const morgan = require('morgan');
-const mongoose = require('mongoose');
+const express = require("express");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+require("./db/db");
 
 const app = express();
-
-// setting up mongoose connection
-mongoose.connect(process.env.db_uri || 'mongodb://localhost:27017/guard_duty', {useNewUrlParser: true});
 // set up logger using morgan
-app.use(morgan('combined'));
+app.use(morgan("combined"));
+app.use(bodyParser.json());
+
+app.use("/api/accounts", require("./api/AccountRoutes"));
 
 module.exports = app;
