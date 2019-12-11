@@ -1,38 +1,32 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const AccountSchema = new Schema({
   username: {
-    required: true,
+    required: [true, 'Username is required'],
     unique: true,
-    type: String
+    type: String,
   },
   password: {
-    required: true,
-    type: String
+    required: [true, 'Password is required'],
+    type: String,
   },
   role: {
     required: true,
     type: String,
-    num: ["user", "admin"],
-    default: "user"
+    enum: ['user', 'admin'],
+    default: 'user',
   },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true
-      }
-    }
-  ]
+  token: String,
+  lastLoggedIn: Date,
 });
 
-AccountSchema.pre("save", async function(next) {
+AccountSchema.pre('save', async function(next) {
   // Hash the password before saving the user model
   const user = this;
-  if (user.isModified("password")) {
+  if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, 8);
   }
   next();
@@ -41,8 +35,11 @@ AccountSchema.pre("save", async function(next) {
 AccountSchema.methods.generateAuthToken = async function() {
   // Generate an auth token for the user
   const user = this;
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY);
-  user.tokens = user.tokens.concat({ token });
+  const token = jwt.sign(
+      {_id: user._id},
+      process.env.JWT_KEY,
+      {expiresIn: '1d'});
+  user.token = token;
   await user.save();
   return token;
 };
@@ -50,18 +47,19 @@ AccountSchema.methods.generateAuthToken = async function() {
 AccountSchema.methods.toJSON = function() {
   const user = this.toObject();
   delete user.password;
+  delete user.token;
   return user;
 };
 
 AccountSchema.statics.findByCredentials = async (username, password) => {
   // Search for a user by email and password.
-  const user = await Account.findOne({ username });
+  const user = await Account.findOne({username});
   if (!user) {
-    throw new Error({ error: "Invalid login credentials" });
+    throw new Error({error: 'Invalid login credentials'});
   }
   const isPasswordMatch = await bcrypt.compare(password, user.password);
   if (!isPasswordMatch) {
-    throw new Error({ error: "Invalid login credentials" });
+    throw new Error({error: 'Invalid login credentials'});
   }
   return user;
 };
@@ -70,5 +68,5 @@ AccountSchema.statics.findByCredentials = async (username, password) => {
 //   const user = await Account.findOne;
 // };
 
-const Account = mongoose.model("Account", AccountSchema);
+const Account = mongoose.model('Account', AccountSchema);
 module.exports = Account;
