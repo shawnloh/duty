@@ -6,6 +6,7 @@ const auth = (req, res, next) => {
   if (!req.header('Authorization')) {
     return res.status(400).send({error: 'Invalid token'});
   }
+
   if (req.header('Authorization').indexOf('Bearer') == -1) {
     return res.status(400).send({error: 'Invalid token'});
   }
@@ -31,4 +32,5 @@ const auth = (req, res, next) => {
     }
   });
 };
+
 module.exports = auth;

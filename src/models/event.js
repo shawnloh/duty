@@ -25,6 +25,10 @@ const EventSchema = new Schema({
     required: [true, 'Officer(s) quantity is required'],
     default: 0,
   },
+  pointType: {
+    type: Schema.Types.ObjectId,
+    ref: 'Point',
+  },
   personnels: [
     {
       type: Schema.Types.ObjectId,
@@ -39,6 +43,11 @@ const EventSchema = new Schema({
     type: Date,
     default: {type: Date, default: Date.now},
   },
+});
+
+EventSchema.pre('save', (next) => {
+  this.lastModified = Date.now();
+  next();
 });
 
 module.exports = mongoose.model('Event', EventSchema);

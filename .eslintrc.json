@@ -4,7 +4,9 @@
     "es6": true,
     "node": true
   },
-  "extends": ["google"],
+  "extends": [
+    "google"
+  ],
   "plugins": [],
   "globals": {
     "Atomics": "readonly",
@@ -12,5 +14,8 @@
   },
   "parserOptions": {
     "ecmaVersion": 2018
+  },
+  "rules": {
+    "new-cap": "off"
   }
 }

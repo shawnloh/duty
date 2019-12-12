@@ -15,12 +15,18 @@ const PersonSchema = new Schema({
     required: true,
     trim: true,
   },
-  dutyPoints: {
-    type: Number,
-    default: 0,
-  },
+  dutyPoints: [{
+    pointType: {
+      type: Schema.Types.ObjectId,
+      ref: 'point',
+    },
+    points: {
+      type: Number,
+      default: 0,
+    },
+  }],
   blockOutDates: {
-    type: [date],
+    type: [Date],
     default: [],
   },
   status: [
