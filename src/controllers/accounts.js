@@ -1,12 +1,8 @@
-const {Router} = require('express');
 const Account = require('../models/account');
 const validator = require('../validators/accountValidator');
-const auth = require('../middleware/auth');
 
-// eslint-disable-next-line new-cap
-const router = Router();
 
-router.post('/login', async (req, res) => {
+module.exports.login = async (req, res) => {
   // Login a registered user
   try {
     validator.loginCredentials(req.body.username, req.body.password);
@@ -22,10 +18,9 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     res.status(400).send(error.message);
   }
-});
+};
 
-router.use(auth);
-router.post('/register', async (req, res) => {
+module.exports.register = async (req, res) => {
   try {
     console.log(req.user);
     if (req.user.role != 'admin') {
@@ -39,14 +34,13 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     res.status(400).send(error.message);
   }
-});
+};
 
-
-router.get('/me', (req, res) => {
+module.exports.me = (req, res) => {
   res.send(req.user);
-});
+};
 
-router.post('/logout', async (req, res) => {
+module.exports.logout = async (req, res) => {
   try {
     req.user.token = null;
     await req.user.save();
@@ -55,6 +49,5 @@ router.post('/logout', async (req, res) => {
     console.log(error);
     res.status(500).send({message: 'internal server error'});
   }
-});
+};
 
-module.exports = router;

@@ -4,6 +4,11 @@ const StatusSchema = new mongoose.Schema({
   name: {
     type: String,
     required: 'Name is required',
+    unique: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

@@ -8,7 +8,8 @@ const app = express();
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 
-app.use('/api/accounts', require('./api/AccountRoutes'));
-app.use('/api/events', require('./api/EventRoutes'));
+app.use('/api/accounts', require('./routes/accounts'));
+app.use('/api/events', require('./routes/events'));
+app.use('/api/status', require('./routes/status'));
 
 module.exports = app;
