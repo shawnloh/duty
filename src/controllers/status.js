@@ -10,22 +10,20 @@ module.exports.getAll = async (req, res) => {
   }
 };
 
-module.exports.create = async (req, res) => {
-  try {
-    if (!req.body.name || req.body.name.trim() == '') {
-      return res.status(400).json({message: 'Status name is required'});
-    }
-    await status.init();
-
-    const newstatus = new status({name: req.body.name.trim()});
-    newstatus.save().then(() => {
-      res.status(201).json({message: 'Successfully created status'});
-    }).catch((err) => {
-      res.status(400).json({message: 'Duplicated status'});
-    });
-  } catch (error) {
-    res.status(500).send('Internal Server Error');
+module.exports.create = (req, res) => {
+  if (!req.body.name || req.body.name.trim() == '') {
+    return res.status(400).json({message: 'Status name is required'});
   }
+
+  const newstatus = new status({name: req.body.name.trim()});
+  newstatus.save().then(() => {
+    res.status(201).json({message: 'Successfully created status'});
+  }).catch((err) => {
+    if (err.errmsg && err.errmsg.indexOf('duplicate key') != -1) {
+      return res.status(400).json({message: 'Duplicated status'});
+    }
+    res.status(500).json({message: 'Internal Server Error'});
+  });
 };
 
 module.exports.delete = async (req, res) => {
