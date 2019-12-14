@@ -22,7 +22,6 @@ module.exports.login = async (req, res) => {
 
 module.exports.register = async (req, res) => {
   try {
-    console.log(req.user);
     if (req.user.role != 'admin') {
       throw new Error('You need to be admin to use register an account');
     }

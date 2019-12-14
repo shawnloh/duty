@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 
 const RankSchema = new mongoose.Schema({
-  RankCategory: {
+  Group: {
     type: String,
-    required: [true, 'Rank Category is required'],
+    required: [true, 'Group is required'],
+    unique: true,
+    trim: true,
   },
   Ranks: [String],
 });

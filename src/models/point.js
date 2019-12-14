@@ -6,12 +6,9 @@ const PointSchema = new Schema({
     type: String,
     required: [true, 'Name is required for point schema'],
   },
-  rankCategory: [{
-    Category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Rank',
-    },
-    Ranks: [String],
+  ranks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Rank',
   }],
   statusNotAllowed: [{
     type: mongoose.Schema.Types.ObjectId,

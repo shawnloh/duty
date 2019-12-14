@@ -11,5 +11,11 @@ app.use(bodyParser.json());
 app.use('/api/accounts', require('./routes/accounts'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/status', require('./routes/status'));
+app.use('/api/ranks', require('./routes/ranks'));
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Internal Server Error');
+});
 
 module.exports = app;

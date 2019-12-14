@@ -4,6 +4,7 @@ const Promise = require('bluebird');
 // models
 const account = require('../models/account');
 const status = require('../models/status');
+const rank = require('../models/rank');
 
 // Change mongoose promise to use bluebird instead
 mongoose.Promise = Promise;
@@ -16,7 +17,7 @@ mongoose.connect(
 
 // Init database index for unique
 const setupModelsIndex = () => {
-  Promise.all([account.init(), status.init()]).then(() => {
+  Promise.all([account.init(), status.init(), rank.init()]).then(() => {
     console.log('finished setting up database index');
   });
 };
