@@ -12,6 +12,8 @@ app.use('/api/accounts', require('./routes/accounts'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/status', require('./routes/status'));
 app.use('/api/ranks', require('./routes/ranks'));
+app.use('/api/person', require('./routes/person'));
+
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);

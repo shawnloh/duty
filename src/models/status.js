@@ -5,6 +5,7 @@ const StatusSchema = new mongoose.Schema({
     type: String,
     required: 'Name is required',
     unique: true,
+    trim: true,
   },
   createdAt: {
     type: Date,

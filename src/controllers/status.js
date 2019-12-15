@@ -1,7 +1,6 @@
 const status = require('../models/status');
 
 module.exports.getAll = async (req, res) => {
-  console.log(req.header('Authorization'));
   try {
     const statuses = await status.find({}).sort({createdAt: -1});
     res.json(statuses);

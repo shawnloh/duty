@@ -5,10 +5,11 @@ const EventSchema = new Schema({
   name: {
     required: [true, 'Event Name is required'],
     type: String,
+    trim: true,
   },
   date: {
     required: [true, 'Date is required'],
-    type: Date,
+    type: String,
   },
   pioneerQuantity: {
     type: Number,

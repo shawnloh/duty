@@ -5,31 +5,29 @@ const PersonSchema = new Schema({
   rank: {
     type: String,
     required: true,
+    uppercase: true,
+    trim: true,
   },
   platoon: {
     type: String,
     required: true,
+    uppercase: true,
+    trim: true,
   },
   name: {
     type: String,
     required: true,
     trim: true,
   },
-  dutyPoints: [{
-    pointType: {
-      type: Schema.Types.ObjectId,
-      ref: 'point',
-    },
-    points: {
-      type: Number,
-      default: 0,
-    },
-  }],
   blockOutDates: {
-    type: [Date],
+    type: [String],
     default: [],
   },
-  status: [
+  points: [{
+    type: Schema.Types.ObjectId,
+    ref: 'PersonnelPoint',
+  }],
+  personnelStatus: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'PersonnelStatus',

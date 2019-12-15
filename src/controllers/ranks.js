@@ -26,8 +26,8 @@ module.exports.create = async (req, res) => {
     });
   }
   const newRank = {
-    Group: req.body.group,
-    Ranks: req.body.ranks ? req.body.ranks : [],
+    group: req.body.group,
+    ranks: req.body.ranks ? req.body.ranks : [],
   };
 
   try {
@@ -60,11 +60,11 @@ module.exports.update = async (req, res) => {
         message: 'Cannot set an empty name to group',
       });
     }
-    rankToUpdate['Group'] = req.body.group;
+    rankToUpdate['group'] = req.body.group;
   }
 
   if (req.body.ranks) {
-    rankToUpdate['Ranks'] = req.body.ranks;
+    rankToUpdate['ranks'] = req.body.ranks;
   }
 
   try {

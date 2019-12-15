@@ -10,6 +10,7 @@ const PointSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Rank',
   }],
+  platoons: [String],
   statusNotAllowed: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Status',

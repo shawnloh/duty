@@ -10,10 +10,14 @@ const rank = require('../models/rank');
 mongoose.Promise = Promise;
 
 // setting up mongoose connection
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 mongoose.connect(
     process.env.MONGODB_URL || 'mongodb://localhost:27017/guard_duty',
-    {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true},
 );
+
 
 // Init database index for unique
 const setupModelsIndex = () => {
