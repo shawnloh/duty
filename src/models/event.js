@@ -28,6 +28,11 @@ const EventSchema = new Schema({
   pointType: {
     type: Schema.Types.ObjectId,
     ref: 'Point',
+    required: [true, 'Type of points system is required'],
+  },
+  pointsAllocation: {
+    type: Number,
+    required: [true, 'Please allocate points to give for this system'],
   },
   personnels: [
     {
@@ -45,7 +50,7 @@ const EventSchema = new Schema({
   },
 });
 
-EventSchema.pre('save', (next) => {
+EventSchema.pre('save', function(next) {
   this.lastModified = Date.now();
   next();
 });

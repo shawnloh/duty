@@ -22,4 +22,5 @@ const setupModelsIndex = () => {
   });
 };
 
+// initiate set up models indexing
 setupModelsIndex();
