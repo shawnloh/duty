@@ -1,4 +1,3 @@
-const {validationResult} = require('express-validator');
 const Promise = require('bluebird');
 const moment = require('moment-timezone');
 const person = require('../models/person');
@@ -9,17 +8,16 @@ const personnelStatus = require('../models/personnelStatus');
 module.exports.viewAll = async (req, res) => {
   const persons = await person.find({})
       // .populate('points')
-      .populate('personnelStatus')
+      .populate('personnelStatus', '-statusId -personId -__v')
+      .populate('rank')
+      .populate('platoon')
+      .select('-__v')
       .exec();
   res.status(200).json(persons);
 };
+
 module.exports.create = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({errors: errors.array({onlyFirstError: true}),
-      });
-    }
     const createdPerson = await person.create(req.body);
     res.status(201).json(createdPerson);
   } catch (error) {
@@ -32,6 +30,7 @@ module.exports.addStatus = async (req, res) => {
   try {
     const currentPerson = req.person;
     const newPersonnelStatus = {
+      personId: req.params.personId,
       statusId: req.body.statusId,
       startDate: moment(req.body.startDate, 'DD-MM-YYYY')
           .format('DD-MM-YYYY'),
@@ -56,12 +55,6 @@ module.exports.addStatus = async (req, res) => {
 
 module.exports.deleteStatus = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({errors: errors.array({onlyFirstError: true}),
-      });
-    }
-
     const removePersonnelStatus = personnelStatus
         .findByIdAndRemove(req.params.personnelStatusId);
     const currentPerson = req.person;

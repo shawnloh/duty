@@ -7,6 +7,10 @@ const personnelStatus = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Status',
   },
+  personId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Person',
+  },
   startDate: {
     type: String,
     required: [true, 'Start date is required'],

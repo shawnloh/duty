@@ -3,6 +3,8 @@ const {body, param} = require('express-validator');
 const moment = require('moment');
 const expressValidation = require('../middleware/expressvalidation');
 const auth = require('../middleware/auth');
+const rankValidator = require('../validators/rankValidator');
+const platoonValidator = require('../validators/platoonValidator');
 const person = require('../models/person');
 const status = require('../models/status');
 const personnelStatus = require('../models/personnelStatus');
@@ -16,15 +18,27 @@ router.use(auth);
 router.get('/', personController.viewAll);
 router.post('/new', [
   body('rank')
-      .isString()
+      .isMongoId()
       .withMessage('Rank is required to create new person')
       .notEmpty()
-      .withMessage('Rank is required to create new person'),
+      .withMessage('Rank is required to create new person')
+      .custom(async (rankId) => {
+        const rank = await rankValidator.exist(rankId);
+        if (!rank) {
+          throw new Error('Rank does not exist, please create one');
+        }
+      }),
   body('platoon')
-      .isString()
+      .isMongoId()
       .withMessage('Person must have a platoon assigned')
       .notEmpty()
-      .withMessage('Person must have a platoon assigned'),
+      .withMessage('Person must have a platoon assigned')
+      .custom(async (platoonId) => {
+        const platoon = await platoonValidator.exist(platoonId);
+        if (!platoon) {
+          throw new Error('Platoon does not exist, please create one');
+        }
+      }),
   body('name')
       .isString()
       .withMessage('Person must have a name')

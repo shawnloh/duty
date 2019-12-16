@@ -20,8 +20,7 @@ const AccountSchema = new Schema({
     default: 'user',
   },
   token: String,
-  lastLoggedIn: Date,
-});
+}, {timestamps: true});
 
 AccountSchema.pre('save', async function(next) {
   // Hash the password before saving the user model

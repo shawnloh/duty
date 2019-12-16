@@ -4,13 +4,14 @@ const Schema = mongoose.Schema;
 const PointSchema = new Schema({
   name: {
     type: String,
+    trim: true,
     required: [true, 'Name is required for point schema'],
   },
-  ranks: [{
+  group: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Rank',
-  }],
-  platoons: [String],
+    ref: 'Group',
+    required: true,
+  },
   statusNotAllowed: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Status',

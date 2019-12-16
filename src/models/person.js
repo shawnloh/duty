@@ -3,16 +3,12 @@ const Schema = mongoose.Schema;
 
 const PersonSchema = new Schema({
   rank: {
-    type: String,
-    required: true,
-    uppercase: true,
-    trim: true,
+    type: Schema.Types.ObjectId,
+    ref: 'Rank',
   },
   platoon: {
-    type: String,
-    required: true,
-    uppercase: true,
-    trim: true,
+    type: Schema.Types.ObjectId,
+    ref: 'Platoon',
   },
   name: {
     type: String,

@@ -9,11 +9,13 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 
 app.use('/api/accounts', require('./routes/accounts'));
+app.use('/api/person', require('./routes/person'));
+app.use('/api/groups', require('./routes/groups'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/status', require('./routes/status'));
+app.use('/api/points', require('./routes/points'));
 app.use('/api/ranks', require('./routes/ranks'));
-app.use('/api/person', require('./routes/person'));
-
+app.use('/api/platoons', require('./routes/platoons'));
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);

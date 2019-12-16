@@ -1,6 +1,6 @@
 const {Router} = require('express');
 const {body, param} = require('express-validator');
-const ranksController = require('../controllers/ranks');
+const platoonsController = require('../controllers/platoons');
 const auth = require('../middleware/auth');
 const expressValidation = require('../middleware/expressvalidation');
 
@@ -8,25 +8,25 @@ const router = Router();
 
 router.use(auth);
 
-router.get('/', ranksController.viewAll);
+router.get('/', platoonsController.viewAll);
 router.post('/', [
   body('name')
       .notEmpty({ignore_whitespace: true})
-      .withMessage('Name is required to create a rank')
+      .withMessage('Name is required to create a platoon')
       .isString()
-      .withMessage('Name is required to create a rank'),
+      .withMessage('Name is required to create a platoon'),
   expressValidation,
-], ranksController.create);
+], platoonsController.create);
 
-router.route('/:rankId')
+router.route('/:platoonId')
     .all([
-      param('rankId')
+      param('platoonId')
           .isMongoId()
           .withMessage('Please provide a valid id'),
       expressValidation,
     ])
-    .put(ranksController.update)
-    .delete(ranksController.delete);
+    .put(platoonsController.update)
+    .delete(platoonsController.delete);
 
 router.use((err, req, res, next) => {
   console.error(err.stack);

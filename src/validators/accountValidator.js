@@ -1,9 +1,9 @@
 const verifyStandardCredentials = (username, password) => {
   if (!username) {
-    return "username cannot be blank";
+    return 'username cannot be blank';
   }
   if (!password) {
-    return "password cannot be blank";
+    return 'password cannot be blank';
   }
   return null;
 };
@@ -16,7 +16,7 @@ const registerCredentials = (username, password) => {
   return {
     username,
     password,
-    role: "user"
+    role: 'user',
   };
 };
 
@@ -28,11 +28,11 @@ const loginCredentials = (username, password) => {
 
   return {
     username,
-    password
+    password,
   };
 };
 
 module.exports = {
   registerCredentials,
-  loginCredentials
+  loginCredentials,
 };
