@@ -30,12 +30,6 @@ module.exports.create = async (req, res) => {
 
 module.exports.addStatus = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({errors: errors.array({onlyFirstError: true}),
-      });
-    }
-
     const currentPerson = req.person;
     const newPersonnelStatus = {
       statusId: req.body.statusId,
@@ -84,7 +78,7 @@ module.exports.deleteStatus = async (req, res) => {
 
 module.exports.updateStatus = async (req, res) => {
   try {
-    const currStatus = req.personnelStatus;
+    let currStatus = req.personnelStatus;
     if (req.body.startDate) {
       // currStatus.startDate = moment(req.body.startDate, 'DD-MM-YYYY')
       // .format('DD-MM-YYYY');
@@ -96,7 +90,10 @@ module.exports.updateStatus = async (req, res) => {
       currStatus.endDate = req.body.endDate;
     }
 
-    await currStatus.save({validateBeforeSave: true});
+    currStatus = await personnelStatus.findByIdAndUpdate(currStatus._id)
+        .populate('statusId')
+        .exec();
+    // await currStatus.save({validateBeforeSave: true});
     res.status(200).json(currStatus);
   } catch (error) {
     console.log(error);

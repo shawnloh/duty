@@ -30,6 +30,7 @@ router.post('/new', [
       .withMessage('Person must have a name')
       .notEmpty()
       .withMessage('Person must have a name'),
+  expressValidation,
 ], personController.create);
 
 // Personnel Status Routes
@@ -72,25 +73,18 @@ router.post('/:personId/addstatus', [
         }
         return true;
       }),
+  expressValidation,
 ], personController.addStatus);
 
 router.route('/:personId/:personnelStatusId')
     .all([
-      param('personId')
-          .isMongoId()
-          .custom(async (id, {req}) => {
-            const foundPerson = await person.findById(id).exec();
-            if (!foundPerson) {
-              return Promise.reject(new Error('Invalid person id'));
-            }
-            req.person = foundPerson;
-          }),
       param('personnelStatusId')
           .isMongoId()
           .withMessage('Please provide a valid personnel status id')
           .custom(async (personnelStatusId, {req}) => {
             const foundStatus = await personnelStatus
                 .findById(personnelStatusId)
+                .populate('statusId')
                 .exec();
             if (!foundStatus) {
               return Promise.reject(
@@ -101,27 +95,20 @@ router.route('/:personId/:personnelStatusId')
             }
             req.personnelStatus = foundStatus;
           }),
-      expressValidation,
-    ])
-    .delete(personController.deleteStatus)
-    .put(personController.updateStatus);
 
-// router.put('/updatestatus/:personnelStatusid', [param('personnelStatusId')
-//       .notEmpty()
-//       .withMessage('Personnel status id is required')
-//       .isMongoId()
-//       .withMessage('Please provide a valid personnel status id')
-//       .custom(async (personnelStatusId) => {
-//         const foundStatus = await personnelStatus.findById(statusId).exec();
-//         if (!foundStatus) {
-//           return Promise.reject(
-//               new Error(
-//                   'Invalid personnel status id',
-//               ),
-//           );
-//         }
-//       }),
-// ],]);
+    ])
+    .delete(param('personId')
+        .isMongoId()
+        .custom(async (id, {req}) => {
+          const foundPerson = await person.findById(id)
+              .populate('personnelStatus')
+              .exec();
+          if (!foundPerson) {
+            return Promise.reject(new Error('Invalid person id'));
+          }
+          req.person = foundPerson;
+        }), expressValidation, personController.deleteStatus)
+    .put(expressValidation, personController.updateStatus);
 
 
 module.exports = router;
