@@ -1,6 +1,6 @@
 const Point = require('../models/point');
 
-module.exports.viewAll = async (req, res) => {
+module.exports.viewAll = async (req, res, next) => {
   try {
     const points = await Point.find({})
         .populate('statusNotAllowed')
@@ -8,11 +8,7 @@ module.exports.viewAll = async (req, res) => {
         .exec();
     res.status(200).json(points);
   } catch (error) {
-    res.status(500).json({
-      errors: [{
-        msg: 'Internal Server Error',
-      }],
-    });
+    next(error);
   }
 };
 
@@ -23,4 +19,5 @@ module.exports.create = async (req, res) => {
     statusNotAllowed: [],
     onlyStatus: false,
   };
+  res.send('in progress');
 };

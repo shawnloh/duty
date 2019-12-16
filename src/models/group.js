@@ -16,7 +16,7 @@ const GroupSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Rank',
   }],
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Group', GroupSchema);
 

@@ -5,9 +5,9 @@ const PlatoonSchema = new mongoose.Schema({
     type: String,
     trim: true,
     uppercase: true,
-    required: [true, 'Platoon name is required'],
+    required: [true, 'Name is required to create a platoon'],
     unique: true,
   },
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Platoon', PlatoonSchema);

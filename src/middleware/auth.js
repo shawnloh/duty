@@ -10,14 +10,14 @@ const auth = (req, res, next) => {
   }
 
   if (req.header('Authorization').indexOf('Bearer') == -1) {
-    return res.status(400).send({message: 'Invalid token'});
+    return res.status(400).send({errors: ['Invalid token']});
   }
 
   const token = req.header('Authorization').replace('Bearer ', '');
   jwt.verify(token, process.env.JWT_KEY, {}, async (err, data) => {
     try {
       if (err) {
-        return res.status(400).send({message: 'Invalid token'});
+        return res.status(400).send({errors: ['Invalid token']});
       }
       const user = await Account.findOne({
         _id: data._id,

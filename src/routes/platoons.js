@@ -1,8 +1,10 @@
 const {Router} = require('express');
 const {body, param} = require('express-validator');
+
 const platoonsController = require('../controllers/platoons');
 const auth = require('../middleware/auth');
-const expressValidation = require('../middleware/expressvalidation');
+const expressValidation = require('../middleware/expressValidation');
+const errorHandler = require('../middleware/errorHandler');
 
 const router = Router();
 
@@ -22,19 +24,12 @@ router.route('/:platoonId')
     .all([
       param('platoonId')
           .isMongoId()
-          .withMessage('Please provide a valid id'),
+          .withMessage('Please provide a valid platoon id'),
       expressValidation,
     ])
     .put(platoonsController.update)
     .delete(platoonsController.delete);
 
-router.use((err, req, res, next) => {
-  console.error(err.stack);
-  if (err.name == 'ValidationError') {
-    console.error('Error Validating!', err);
-    return res.status(422).json(err);
-  }
-  res.status(500).json({'message': 'Internal Server Error'});
-});
+router.use(errorHandler.API);
 
 module.exports = router;

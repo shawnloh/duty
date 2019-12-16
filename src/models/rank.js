@@ -6,8 +6,8 @@ const RankSchema = new mongoose.Schema({
     trim: true,
     uppercase: true,
     unique: true,
-    required: [true, 'Rank name is required'],
+    required: [true, 'Name is required to create a rank'],
   },
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Rank', RankSchema);

@@ -41,19 +41,6 @@ const EventSchema = new Schema({
       ref: 'Person',
     },
   ],
-  createdAt: {
-    type: Date,
-    default: {type: Date, default: Date.now},
-  },
-  lastModified: {
-    type: Date,
-    default: {type: Date, default: Date.now},
-  },
-});
-
-EventSchema.pre('save', function(next) {
-  this.lastModified = Date.now();
-  next();
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Event', EventSchema);

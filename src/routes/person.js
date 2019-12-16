@@ -1,7 +1,8 @@
 const {Router} = require('express');
 const {body, param} = require('express-validator');
 const moment = require('moment');
-const expressValidation = require('../middleware/expressvalidation');
+const expressValidation = require('../middleware/expressValidation');
+const errorHandler = require('../middleware/errorHandler');
 const auth = require('../middleware/auth');
 const rankValidator = require('../validators/rankValidator');
 const platoonValidator = require('../validators/platoonValidator');
@@ -124,5 +125,6 @@ router.route('/:personId/:personnelStatusId')
         }), expressValidation, personController.deleteStatus)
     .put(expressValidation, personController.updateStatus);
 
+router.use(errorHandler.API);
 
 module.exports = router;

@@ -29,6 +29,6 @@ const PersonSchema = new Schema({
       ref: 'PersonnelStatus',
     },
   ],
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Person', PersonSchema);

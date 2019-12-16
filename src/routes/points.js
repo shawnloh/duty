@@ -1,7 +1,8 @@
 const {Router} = require('express');
 const {body} = require('express-validator');
 const auth = require('../middleware/auth');
-const expressValidation = require('../middleware/expressvalidation');
+const expressValidation = require('../middleware/expressValidation');
+const errorHandler = require('../middleware/errorHandler');
 const pointsController = require('../controllers/points');
 
 const router = Router();
@@ -29,5 +30,7 @@ router.post('/new', [
       .withMessage('Only true or false is allowed for onlyStatus'),
   expressValidation,
 ], pointsController.create);
+
+router.use(errorHandler.API);
 
 module.exports = router;

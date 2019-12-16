@@ -23,13 +23,8 @@ module.exports.update = async (req, res, next) => {
   try {
     let rank = await rankValidator.exist(req.params.rankId);
     if (!rank) {
-      return res.status(400).json({'errors': [
-        {
-          'msg': 'Please provide a valid rank id',
-        },
-      ]});
+      return res.status(400).json({errors: ['Please provide a valid id']});
     }
-
     rank.name = req.body.name;
     rank = await rank.save();
     res.status(200).json(rank);
@@ -42,11 +37,7 @@ module.exports.delete = async (req, res, next) => {
   try {
     const deletedRank = await rank.findByIdAndDelete(req.params.rankId).exec();
     if (!deletedRank) {
-      return res.status(400).json({'errors': [
-        {
-          'msg': 'Please provide a valid rank id',
-        },
-      ]});
+      return res.status(400).json({errors: ['Please provide a valid id']});
     }
     res.status(200).json(deletedRank);
   } catch (error) {

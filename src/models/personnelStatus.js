@@ -40,7 +40,7 @@ const personnelStatus = new mongoose.Schema({
     required: [true, 'expired is required'],
     default: false,
   },
-});
+}, {timestamps: true});
 
 personnelStatus.pre('save', function(next) {
   this.expired = expiry.statusBeforeToday(this.endDate);

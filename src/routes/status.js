@@ -1,4 +1,7 @@
 const {Router} = require('express');
+const {body, param} = require('express-validator');
+const errorHandler = require('../middleware/errorHandler');
+const expressValidation = require('../middleware/expressValidation');
 const statusController = require('../controllers/status');
 const auth = require('../middleware/auth');
 
@@ -7,10 +10,26 @@ router.use(auth);
 
 router.route('/')
     .get(statusController.getAll)
-    .post(statusController.create);
+    .post([
+      body('name')
+          .notEmpty()
+          .withMessage('Status name is required for creation'),
+      expressValidation,
+    ], statusController.create);
 
 router.route('/:statusId')
-    .delete(statusController.delete)
-    .put(statusController.update);
+    .all([
+      param('statusId')
+          .isMongoId()
+          .withMessage('Please provide a valid status id'),
+    ])
+    .delete(expressValidation, statusController.delete)
+    .put([
+      body('name')
+          .notEmpty()
+          .withMessage('Name is required for updating current status'),
+      expressValidation,
+    ], statusController.update);
 
+router.use(errorHandler.API);
 module.exports = router;

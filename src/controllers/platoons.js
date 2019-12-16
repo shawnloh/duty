@@ -24,9 +24,7 @@ module.exports.update = async (req, res, next) => {
     let platoon = await platoonValidator.exist(req.params.platoonId);
     if (!platoon) {
       return res.status(400).json({'errors': [
-        {
-          'msg': 'Please provide a valid platoon id',
-        },
+        'Please provide a valid platoon id',
       ]});
     }
 
@@ -45,9 +43,7 @@ module.exports.delete = async (req, res, next) => {
         .exec();
     if (!deletedplatoon) {
       return res.status(400).json({'errors': [
-        {
-          'msg': 'Please provide a valid platoon id',
-        },
+        'Please provide a valid platoon id',
       ]});
     }
     res.status(200).json(deletedplatoon);
