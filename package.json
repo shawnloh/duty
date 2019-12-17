@@ -6,9 +6,19 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "env-cmd -f ./.env nodemon ./bin/www"
+    "dev": "env-cmd -f ./.env nodemon ./bin/www",
+    "test": "jest --watch"
   },
   "author": "Shawn Loh",
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "setupFiles": [
+      "<rootDir>/tests/setupEnv.js"
+    ]
+  },
   "dependencies": {
     "bcrypt": "^3.0.7",
     "bluebird": "^3.7.2",
@@ -27,6 +37,8 @@
     "env-cmd": "^10.0.1",
     "eslint": "^6.7.2",
     "eslint-config-google": "^0.14.0",
-    "prettier": "^1.19.1"
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "supertest": "^4.0.2"
   }
 }

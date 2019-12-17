@@ -14,7 +14,7 @@ module.exports.login = async (req, res, next) => {
     const token = await user.generateAuthToken();
     res.send({token});
   } catch (error) {
-    next(err);
+    next(error);
   }
 };
 

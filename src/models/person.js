@@ -5,10 +5,12 @@ const PersonSchema = new Schema({
   rank: {
     type: Schema.Types.ObjectId,
     ref: 'Rank',
+    required: [true, 'Rank is needed for creating a person'],
   },
   platoon: {
     type: Schema.Types.ObjectId,
     ref: 'Platoon',
+    required: [true, 'Platoon is needed for creating a person'],
   },
   name: {
     type: String,
