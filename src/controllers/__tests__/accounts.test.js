@@ -1,216 +1,185 @@
-const request = require('supertest');
-const app = require('../../app');
+const {login} = require('../accounts');
 const account = require('../../models/account');
-// const rank = require('../../models/rank');
-// const platoon = require('../../models/platoon');
 
+const mockResponse = () => {
+  const res = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  return res;
+};
 
-describe('/api/accounts/login', () => {
-  beforeAll(async (done) => {
-    // const createdRank = await rank.create({name: 'LCP'});
-    // const createdPlatoon = await platoon.create({name: 'HQ'});
-    await account.create([{
-      username: 'user',
-      password: '123',
-      role: 'user',
-    },
-    {
-      username: 'admin',
-      password: '123',
-      role: 'admin',
-    }]);
+jest.mock('../../models/account');
 
-    done();
-  });
-
-  afterAll(async (done) => {
-    await account.deleteMany({});
-    done();
-  });
-
-  describe('User did not give username and password', () => {
-    let res;
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/login');
-      done();
+describe('Login', () => {
+  describe('Does not use account models module to find user', () => {
+    const req = {
+      body: {},
+    };
+    let res = mockResponse();
+    const next = jest.fn();
+    beforeEach(() => {
+      res = mockResponse();
     });
 
-    test('should give 400 status code', () => {
-      expect(res.status).toEqual(400);
-    });
-    test('should contain 2 correct errors', () => {
-      const expected = ['Username is required', 'Password is required'];
-      expect(res.body.errors).toEqual(expected);
-      expect(res.body.errors.length).toEqual(2);
-    });
-  });
-
-  describe('User give only username', () => {
-    let res;
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/login')
-          .send({username: 'hello'});
-      done();
-    });
-    test('should give 400 status code', () => {
-      expect(res.status).toEqual(400);
-    });
-    test('should contain 1 correct error', () => {
-      const expected = ['Password is required'];
-      expect(res.body.errors).toEqual(expected);
-      expect(res.body.errors.length).toEqual(1);
-    });
-  });
-
-  describe('User give only password', () => {
-    let res;
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/login')
-          .send({password: '123'});
-      done();
-    });
-    test('should give 400 status code', () => {
-      expect(res.status).toEqual(400);
-    });
-    test('should contain 1 correct error', () => {
-      const expected = ['Username is required'];
-      expect(res.body.errors).toEqual(expected);
-      expect(res.body.errors.length).toEqual(1);
-    });
-  });
-
-  describe('User give incorrect username and password', () => {
-    let res;
-
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/login')
-          .send({username: 'lalala', password: '123'});
-      done();
-    });
-
-    test('should give 401 status code', () => {
-      expect(res.status).toEqual(401);
-    });
-
-    test('should contain 1 correct error', () => {
-      const expected = ['Login failed! Check authentication credentials'];
-      expect(res.body.errors).toEqual(expected);
-      expect(res.body.errors.length).toEqual(1);
-    });
-  });
-
-  describe('User give correct username and password', () => {
-    let res;
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/login')
-          .send({
-            username: 'user', password: '123',
-          });
-      done();
-    });
-
-    test('should give 200 status code', () => {
-      expect(res.status).toEqual(200);
-    });
-    test('should not give any errors', () => {
-      expect(res.body.errors).toBeFalsy();
-      expect(res.body).not.toHaveProperty('errors');
-    });
-
-    test('should give a token back', () => {
-      expect(res.body.token).toBeTruthy();
-    });
-  });
-});
-
-describe('/api/accounts/register', () => {
-  beforeAll(async (done) => {
-    await account.create([{
-      username: 'user',
-      password: '123',
-      role: 'user',
-    },
-    {
-      username: 'admin',
-      password: '123',
-      role: 'admin',
-    }]);
-
-    done();
-  });
-
-  afterAll(async (done) => {
-    await account.deleteMany({});
-    done();
-  });
-
-  describe('Not Authenticated', () => {
-    let res;
-    beforeAll(async (done) => {
-      res = await request(app)
-          .post('/api/accounts/register');
-      done();
-    });
-    test('should give 401 status code', () => {
-      expect(res.status).toBe(401);
-    });
-    test('should contain 1 correct error', () => {
-      expect(res.body.message).toBeTruthy();
-      expect(res.body.message).toEqual(
-          'Not authorized to access this resource',
-      );
-    });
-  });
-
-  describe('Authenticated', () => {
-    describe('Not an admin role', () => {
-      let res;
-      beforeAll(async (done) => {
-        const loginRes = await request(app)
-            .post('/api/accounts/login')
-            .send({username: 'user', password: '123'});
-
-        const token = loginRes.body.token;
-        res = await request(app)
-            .post('/api/accounts/register')
-            .set('Authorization', `Bearer ${token}`)
-            .send({username: 'testuser', password: 'testpassword'});
-        done();
+    describe('Does not contain username and password', () => {
+      test('should give status of 401', () => {
+        login(req, res, next);
+        expect(res.status).toBeCalled();
+        expect(res.status).toBeCalledWith(401);
       });
-
-      test('should give 401 status code', () => {
-        expect(res.status).toBe(401);
-      });
-      test('should contain 1 correct error', () => {
-        const expected = ['You need to be admin to register an account'];
-        expect(res.body.errors).toBeTruthy();
-        expect(res.body.errors.length).toEqual(1);
-        expect(res.body.errors).toEqual(expected);
+      test('should give 1 correct error messages', () => {
+        login(req, res, next);
+        expect(res.json).toBeCalled();
+        expect(res.json).toBeCalledWith({
+          errors: ['Login failed! Check authentication credentials'],
+        });
       });
     });
 
-    describe('An admin role', () => {
-      let res;
-      beforeAll(async (done) => {
-        const loginRes = await request(app)
-            .post('/api/accounts/login')
-            .send({username: 'admin', password: '123'});
-
-        const token = loginRes.body.token;
-        res = await request(app)
-            .post('/api/accounts/register')
-            .set('Authorization', `Bearer ${token}`)
-            .send({username: 'testuser', password: 'testpassword'});
-        done();
+    describe('Does not contain password', () => {
+      test('should give status of 401', () => {
+        login(req, res, next);
+        expect(res.status).toBeCalled();
+        expect(res.status).toBeCalledWith(401);
       });
-      test('should give 201 status', () => {
-        expect(res.status).toBe(201);
+      test('should give 1 correct error messages', () => {
+        login(req, res, next);
+        expect(res.json).toBeCalled();
+        expect(res.json).toBeCalledWith({
+          errors: ['Login failed! Check authentication credentials'],
+        });
+      });
+    });
+    describe('Does not contain username', () => {
+      test('should give status of 401', () => {
+        login(req, res, next);
+        expect(res.status).toBeCalled();
+        expect(res.status).toBeCalledWith(401);
+      });
+      test('should give 1 correct error messages', () => {
+        login(req, res, next);
+        expect(res.json).toBeCalled();
+        expect(res.json).toBeCalledWith({
+          errors: ['Login failed! Check authentication credentials'],
+        });
+      });
+    });
+    test('Account model must not be called', () => {
+      expect(account.findByCredentials).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('Using account model module to find user', () => {
+    describe('Invalid credentials', () => {
+      const req = {
+        body: {
+          username: 'lala',
+          password: '123',
+        },
+      };
+
+      account.findByCredentials.mockReturnValue(Promise.resolve(null));
+      let res = mockResponse();
+      let next = jest.fn();
+      beforeAll(() => {
+        jest.clearAllMocks();
+        res = mockResponse();
+        next = jest.fn();
+        return login(req, res, next);
+      });
+      test('should call account findByCredentials', () => {
+        expect(account.findByCredentials).toHaveBeenCalledTimes(1);
+        expect(account.findByCredentials).toHaveBeenCalledWith('lala', '123');
+      });
+
+      test('should give status of 401', () => {
+        expect(res.status).toBeCalled();
+        expect(res.status).toBeCalledWith(401);
+      });
+      test('should give 1 correct error messages', () => {
+        expect(res.json).toBeCalled();
+        expect(res.json).toBeCalledWith({
+          errors: ['Login failed! Check authentication credentials'],
+        });
+      });
+    });
+
+    describe('Correct credentials', () => {
+      const req = {
+        body: {
+          username: 'user',
+          password: '123',
+        },
+      };
+
+      let res = mockResponse();
+      let next = jest.fn();
+      let userResponse;
+
+      beforeAll(() => {
+        userResponse= {
+          username: 'user',
+          generateAuthToken: jest.fn().mockReturnValue(
+              Promise.resolve('token'),
+          ),
+        };
+        account.findByCredentials.mockReturnValue(
+            Promise.resolve(userResponse),
+        );
+        jest.clearAllMocks();
+        res = mockResponse();
+        next = jest.fn();
+        return login(req, res, next);
+      });
+
+      test('should call account.findByCredentials', () => {
+        expect(account.findByCredentials).toHaveBeenCalledTimes(1);
+        expect(account.findByCredentials).toHaveBeenCalledWith('user', '123');
+      });
+
+      test('should call user.generateAuthToken once', () => {
+        expect(userResponse.generateAuthToken).toHaveBeenCalledTimes(1);
+      });
+
+      test('should give status of 200', () => {
+        expect(res.status).toBeCalled();
+        expect(res.status).toBeCalledWith(200);
+      });
+
+      test('should contain token body', () => {
+        expect(res.json).toBeCalled();
+        expect(res.json).toBeCalledWith({token: 'token'});
+      });
+    });
+
+    describe('Account model throw errors', () => {
+      const req = {
+        body: {
+          username: 'user',
+          password: '123',
+        },
+      };
+
+      let res = mockResponse();
+      let next = jest.fn();
+
+      beforeAll(() => {
+        account.findByCredentials.mockReturnValue(
+            Promise.reject(new Error('some error')),
+        );
+        jest.clearAllMocks();
+        res = mockResponse();
+        next = jest.fn();
+        return login(req, res, next);
+      });
+
+      test('should call next with error', () => {
+        expect(next).toBeCalled();
+        expect(next).toHaveBeenCalledTimes(1);
+        expect(next).toHaveBeenCalledWith(new Error('some error'));
       });
     });
   });
 });
+

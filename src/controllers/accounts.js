@@ -5,14 +5,21 @@ module.exports.login = async (req, res, next) => {
   // Login a registered user
   try {
     const {username, password} = req.body;
+    if (!username || !password) {
+      return res
+          .status(401)
+          .json({errors: ['Login failed! Check authentication credentials']});
+    }
+
     const user = await Account.findByCredentials(username, password);
     if (!user) {
       return res
           .status(401)
           .json({errors: ['Login failed! Check authentication credentials']});
     }
+
     const token = await user.generateAuthToken();
-    res.send({token});
+    res.status(200).json({token});
   } catch (error) {
     next(error);
   }
