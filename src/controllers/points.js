@@ -16,8 +16,8 @@ module.exports.create = async (req, res) => {
   const newPointsSystem = {
     name: req.body.name,
     group: req.body.group,
-    statusNotAllowed: [],
-    onlyStatus: false,
+    statusNotAllowed: req.body.statusNotAllowed || [],
+    onlyStatus: req.body.onlyStatus || false,
   };
-  res.send('in progress');
+  res.send(newPointsSystem);
 };

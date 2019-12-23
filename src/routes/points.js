@@ -23,7 +23,8 @@ router.post('/new', [
       .withMessage('A group is required for new points system'),
   body('statusNotAllowed')
       .optional()
-      .isArray(),
+      .isArray()
+      .withMessage('Only array of status id is allowed'),
   body('onlyStatus')
       .optional()
       .isBoolean()

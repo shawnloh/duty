@@ -14,7 +14,10 @@ module.exports.seed = async () => {
     },
   ];
   console.log('Seeding accounts..');
-  return await account.insertMany(seedAccounts);
+  for (let index = 0; index < seedAccounts.length; index++) {
+    const accountToCreate = seedAccounts[index];
+    await account.create(accountToCreate);
+  }
 };
 
 module.exports.clear = async () => {

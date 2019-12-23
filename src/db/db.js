@@ -43,8 +43,8 @@ const setupModelsIndex = async () => {
 
   // Seed database is env is development
   if (env == 'development') {
-    await seed.clearDB();
-    await seed.all();
+    // await seed.clearDB();
+    // await seed.all();
   };
 };
 
