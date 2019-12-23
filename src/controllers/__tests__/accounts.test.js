@@ -1,50 +1,52 @@
-const {login} = require('../accounts');
+const {login, register, me, logout} = require('../accounts');
+const mongoose = require('mongoose');
 const account = require('../../models/account');
+const mock = require('./utils/mock');
 
-const mockResponse = () => {
-  const res = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.send = jest.fn().mockReturnValue(res);
-  return res;
-};
 
-jest.mock('../../models/account');
+beforeAll(() => {
+  mongoose.set('useNewUrlParser', true);
+  mongoose.set('useFindAndModify', false);
+  mongoose.set('useCreateIndex', true);
+  mongoose.set('useUnifiedTopology', true);
+  mongoose.connect('mongodb://localhost:27017/duty_test');
+});
+afterAll(() => {
+  mongoose.connection.close();
+});
+
 
 describe('Login', () => {
-  describe('Does not use account models module to find user', () => {
-    const req = {
+  beforeEach(async () => {
+    await account.create({username: 'user', password: '123'});
+    await account.create({username: 'admin', password: '123', role: 'admin'});
+  });
+  afterEach(async () => {
+    await account.deleteMany({}).exec();
+  });
+  describe('Insufficient data', () => {
+    let req = {
       body: {},
-    };
-    let res = mockResponse();
-    const next = jest.fn();
+    }; let res; let next;
     beforeEach(() => {
-      res = mockResponse();
-    });
-
-    describe('Does not contain username and password', () => {
-      test('should give status of 401', () => {
-        login(req, res, next);
-        expect(res.status).toBeCalled();
-        expect(res.status).toBeCalledWith(401);
-      });
-      test('should give 1 correct error messages', () => {
-        login(req, res, next);
-        expect(res.json).toBeCalled();
-        expect(res.json).toBeCalledWith({
-          errors: ['Login failed! Check authentication credentials'],
-        });
-      });
+      req = {
+        body: {},
+      };
+      res = mock.response();
+      next = jest.fn();
     });
 
     describe('Does not contain password', () => {
-      test('should give status of 401', () => {
-        login(req, res, next);
+      req.body = {
+        username: 'user',
+      };
+      test('should give status of 401', async () => {
+        await login(req, res, next);
         expect(res.status).toBeCalled();
         expect(res.status).toBeCalledWith(401);
       });
-      test('should give 1 correct error messages', () => {
-        login(req, res, next);
+      test('should give 1 correct error messages', async () => {
+        await login(req, res, next);
         expect(res.json).toBeCalled();
         expect(res.json).toBeCalledWith({
           errors: ['Login failed! Check authentication credentials'],
@@ -52,134 +54,208 @@ describe('Login', () => {
       });
     });
     describe('Does not contain username', () => {
-      test('should give status of 401', () => {
-        login(req, res, next);
+      req.body = {
+        password: 123,
+      };
+      test('should give status of 401', async () => {
+        await login(req, res, next);
         expect(res.status).toBeCalled();
         expect(res.status).toBeCalledWith(401);
       });
-      test('should give 1 correct error messages', () => {
-        login(req, res, next);
+      test('should give 1 correct error messages', async () => {
+        await login(req, res, next);
         expect(res.json).toBeCalled();
         expect(res.json).toBeCalledWith({
           errors: ['Login failed! Check authentication credentials'],
         });
       });
     });
-    test('Account model must not be called', () => {
-      expect(account.findByCredentials).toHaveBeenCalledTimes(0);
-    });
   });
-
-  describe('Using account model module to find user', () => {
-    describe('Invalid credentials', () => {
+  describe('Sufficient data', () => {
+    let res; let next;
+    beforeEach(() => {
+      res = mock.response();
+      next = jest.fn();
+    });
+    describe('Invalid Credentials', () => {
       const req = {
         body: {
           username: 'lala',
           password: '123',
         },
       };
-
-      account.findByCredentials.mockReturnValue(Promise.resolve(null));
-      let res = mockResponse();
-      let next = jest.fn();
-      beforeAll(() => {
-        jest.clearAllMocks();
-        res = mockResponse();
-        next = jest.fn();
-        return login(req, res, next);
-      });
-      test('should call account findByCredentials', () => {
-        expect(account.findByCredentials).toHaveBeenCalledTimes(1);
-        expect(account.findByCredentials).toHaveBeenCalledWith('lala', '123');
-      });
-
-      test('should give status of 401', () => {
+      test('should give status of 401', async () => {
+        await login(req, res, next);
         expect(res.status).toBeCalled();
         expect(res.status).toBeCalledWith(401);
       });
-      test('should give 1 correct error messages', () => {
+
+      test('should give 1 correct error messages', async () => {
+        await login(req, res, next);
         expect(res.json).toBeCalled();
         expect(res.json).toBeCalledWith({
           errors: ['Login failed! Check authentication credentials'],
         });
       });
     });
-
     describe('Correct credentials', () => {
+      let res; let next;
       const req = {
         body: {
           username: 'user',
           password: '123',
         },
       };
-
-      let res = mockResponse();
-      let next = jest.fn();
-      let userResponse;
-
-      beforeAll(() => {
-        userResponse= {
-          username: 'user',
-          generateAuthToken: jest.fn().mockReturnValue(
-              Promise.resolve('token'),
-          ),
-        };
-        account.findByCredentials.mockReturnValue(
-            Promise.resolve(userResponse),
-        );
-        jest.clearAllMocks();
-        res = mockResponse();
+      beforeEach(() => {
+        res = mock.response();
         next = jest.fn();
-        return login(req, res, next);
       });
 
-      test('should call account.findByCredentials', () => {
-        expect(account.findByCredentials).toHaveBeenCalledTimes(1);
-        expect(account.findByCredentials).toHaveBeenCalledWith('user', '123');
-      });
-
-      test('should call user.generateAuthToken once', () => {
-        expect(userResponse.generateAuthToken).toHaveBeenCalledTimes(1);
-      });
-
-      test('should give status of 200', () => {
+      test('should give status of 200', async () => {
+        await login(req, res, next);
         expect(res.status).toBeCalled();
         expect(res.status).toBeCalledWith(200);
       });
 
-      test('should contain token body', () => {
+      test('should give a json of token', async () => {
+        await login(req, res, next);
+        const user = await account.findOne({username: 'user'}).exec();
         expect(res.json).toBeCalled();
-        expect(res.json).toBeCalledWith({token: 'token'});
-      });
-    });
-
-    describe('Account model throw errors', () => {
-      const req = {
-        body: {
-          username: 'user',
-          password: '123',
-        },
-      };
-
-      let res = mockResponse();
-      let next = jest.fn();
-
-      beforeAll(() => {
-        account.findByCredentials.mockReturnValue(
-            Promise.reject(new Error('some error')),
-        );
-        jest.clearAllMocks();
-        res = mockResponse();
-        next = jest.fn();
-        return login(req, res, next);
-      });
-
-      test('should call next with error', () => {
-        expect(next).toBeCalled();
-        expect(next).toHaveBeenCalledTimes(1);
-        expect(next).toHaveBeenCalledWith(new Error('some error'));
+        expect(res.json).toBeCalledWith({'token': user.token});
       });
     });
   });
 });
 
+describe('Register', () => {
+  beforeEach(async () => {
+    await account.create({username: 'user', password: '123'});
+    await account.create({username: 'admin', password: '123', role: 'admin'});
+  });
+  afterEach(async () => {
+    await account.deleteMany({}).exec();
+  });
+  describe('Not an admin role', () => {
+    let req; let res; let next;
+    beforeEach(() => {
+      req = {
+        user: {
+          username: 'user',
+          role: 'user',
+        },
+      };
+
+      res = mock.response();
+      next = jest.fn();
+    });
+    test('should give status of 401', async () => {
+      await register(req, res, next);
+      expect(res.status).toBeCalled();
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(401);
+    });
+
+    test('should give 1 correct error message', async () => {
+      await register(req, res, next);
+      expect(res.json).toBeCalled();
+      expect(res.json).toHaveBeenCalledTimes(1);
+      expect(res.json).toBeCalledWith({
+        errors: ['You need to be admin to register an account'],
+      });
+    });
+
+    test('Db should not have added user', async () => {
+      await register(req, res, next);
+      const accounts = await account.find({}).exec();
+      expect(accounts.length).toBe(2);
+    });
+  });
+
+  describe('An admin role', () => {
+    let req; let res; let next;
+    beforeEach(() => {
+      req = {
+        body: {
+          username: 'newUser',
+          password: 123,
+        },
+        user: {
+          username: 'admin',
+          role: 'admin',
+        },
+      };
+
+      res = mock.response();
+      next = jest.fn();
+    });
+    test('should have 3 accounts in db', async () => {
+      await register(req, res, next);
+      const accounts = await account.find({}).exec();
+      expect(accounts.length).toBe(3);
+    });
+    test('should give status of 201', async () => {
+      await register(req, res, next);
+      expect(res.status).toBeCalled();
+      expect(res.status).toBeCalledTimes(1);
+      expect(res.status).toBeCalledWith(201);
+    });
+
+    test('should give token and account details', async () => {
+      await register(req, res, next);
+      expect(res.json).toBeCalled();
+      expect(res.json).toBeCalledTimes(1);
+    });
+  });
+});
+
+describe('Me - information of current accessed user', () => {
+  const user = {
+    username: 'lalala',
+  };
+  let req; let res; let next;
+  beforeEach(() => {
+    req = {
+      user: user,
+    };
+    res = mock.response();
+    next = jest.fn();
+  });
+
+
+  test('should return status code 200', () => {
+    me(req, res, next);
+    expect(res.status).toBeCalled();
+    expect(res.status).toBeCalledTimes(1);
+    expect(res.status).toBeCalledWith(200);
+  });
+
+  test('should return user', () => {
+    me(req, res, next);
+    expect(res.json).toBeCalled();
+    expect(res.json).toBeCalledTimes(1);
+    expect(res.json).toBeCalledWith(user);
+  });
+});
+
+describe('Logout', () => {
+  let res; let next;
+  const exampleToken = 'testToken';
+  beforeEach(async () => {
+    await account.create({
+      username: 'user', password: '123', token: exampleToken,
+    });
+    res = mock.response();
+    next = jest.fn();
+  });
+  afterEach(async () => {
+    // await account.deleteMany({}).exec();
+  });
+
+  test('Should delete token in db', async () => {
+    const users = await account.find({username: 'user'}).exec();
+    const req = {
+      user: users[0],
+    };
+    await logout(req, res, next);
+  });
+});

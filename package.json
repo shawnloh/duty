@@ -15,6 +15,10 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/src/controllers/__tests__/utils/"
+    ],
     "setupFiles": [
       "<rootDir>/tests/setupEnv.js"
     ]
@@ -34,6 +38,7 @@
     "morgan": "^1.9.1"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.24",
     "env-cmd": "^10.0.1",
     "eslint": "^6.7.2",
     "eslint-config-google": "^0.14.0",

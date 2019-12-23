@@ -32,24 +32,26 @@ module.exports.register = async (req, res, next) => {
           .status(401)
           .json({errors: ['You need to be admin to register an account']});
     }
-    const account = new Account(req.body);
-    await account.save();
+    // const account = new Account(req.body);
+    const account = await Account.create(req.body);
     const token = await account.generateAuthToken();
-    res.status(201).send({account, token});
+    res.status(201).json({account, token});
   } catch (error) {
     next(error);
   }
 };
 
 module.exports.me = (req, res) => {
-  res.send(req.user);
+  res.status(200).json(req.user);
 };
 
 module.exports.logout = async (req, res, next) => {
   try {
-    req.user.token = null;
-    await req.user.save();
-    res.send();
+    await Account.findOneAndUpdate(
+        {_id: req.user._id},
+        {token: null})
+        .exec();
+    res.status(200).json({message: 'Successfully logged out.'});
   } catch (error) {
     next(error);
   }
