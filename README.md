@@ -2,7 +2,10 @@
 
 This duty app is for points system.
 It allows accounts to create points system and generate name and points of required personnel upon an event creation.
-User need to create an event in order to generate
+User need to create an event in order to generate names.
+
+The generation leverage on the points personnel have and lower points have a priority and there will be no back to back date assign.
+If all points are equal, random number generator will be used.
 
 ## Steps To Take On New App
 
