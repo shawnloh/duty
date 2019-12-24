@@ -46,7 +46,7 @@ module.exports.delete = async (req, res, next) => {
         'Please provide a valid platoon id',
       ]});
     }
-    res.status(200).json(deletedplatoon);
+    res.status(200).json({success: true, deletedplatoon});
   } catch (error) {
     next(err);
   }

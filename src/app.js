@@ -10,7 +10,6 @@ app.use(bodyParser.json());
 
 app.use('/api/accounts', require('./routes/accounts'));
 app.use('/api/person', require('./routes/person'));
-app.use('/api/groups', require('./routes/groups'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/status', require('./routes/status'));
 app.use('/api/points', require('./routes/points'));

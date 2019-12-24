@@ -58,7 +58,7 @@ module.exports.deleteStatus = async (req, res, next) => {
       return res.status(400).json(errors);
     }
     await pStatus.remove();
-    res.status(200).json({deleted: true, pStatus});
+    res.status(200).json({success: true, pStatus});
   } catch (error) {
     next(error);
   }

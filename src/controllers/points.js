@@ -1,25 +1,11 @@
+const Promise = require('bluebird');
 const Point = require('../models/point');
+const Person = require('../models/person');
+const personnelPoint = require('../models/personnelPoint');
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const points = await Point.find({})
-        .populate('statusNotAllowed')
-        // .populate('group', '-createdAt -updatedAt -__v')
-        .populate({
-          path: 'group',
-          select: '_id name',
-          populate: [{
-            path: 'ranks',
-            model: 'Rank',
-            select: '_id name',
-          },
-          {
-            path: 'platoons',
-            model: 'Platoon',
-            select: '_id name',
-          }],
-        })
-        .exec();
+    const points = await Point.find({}).exec();
     res.status(200).json(points);
   } catch (error) {
     next(error);
@@ -35,25 +21,56 @@ module.exports.create = async (req, res, next) => {
   };
 
   try {
-    let createdPoint = await Point.create(newPointsSystem);
-    createdPoint = await createdPoint
-        .populate('statusNowAllowed')
-        .populate({
-          path: 'group',
-          select: '_id name',
-          populate: [{
-            path: 'ranks',
-            model: 'Rank',
-            select: '_id name',
-          },
-          {
-            path: 'platoons',
-            model: 'Platoon',
-            select: '_id name',
-          }],
-        })
-        .execPopulate();
+    const createdPoint = await new Point(newPointsSystem).save();
+    const allPerson = await Person.find({});
+    Promise.all(allPerson.map(async (person) => {
+      const newPPoint = {
+        personId: person._id,
+        pointId: createdPoint._id,
+        points: 0,
+      };
+      const createdPersonnelPoint = new personnelPoint(newPPoint);
+      await createdPersonnelPoint.save();
+    }));
+
     res.status(201).send(createdPoint);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.update = async (req, res, next) => {
+  try {
+    let pointSystem = await Point.findById(req.params.pointsId).exec();
+    if (!pointSystem) {
+      return res.status(400).json({errors: ['Invalid point system id']});
+    }
+    if (req.body.name === pointSystem.name) {
+      return res.status(304);
+    }
+
+    pointSystem.name = req.body.name;
+    pointSystem = await pointSystem.save();
+    return res.status(200).json({
+      success: true,
+      pointSystem,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.delete = async (req, res, next) => {
+  try {
+    let pointSystem = await Point.findById(req.params.pointsId).exec();
+    if (!pointSystem) {
+      return res.status(400).json({errors: ['Invalid point system id']});
+    }
+    pointSystem = await pointSystem.remove();
+    return res.status(200).json({
+      success: true,
+      pointSystem,
+    });
   } catch (error) {
     next(error);
   }

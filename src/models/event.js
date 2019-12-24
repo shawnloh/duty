@@ -35,6 +35,22 @@ const EventSchema = new Schema({
     type: Number,
     required: [true, 'Please allocate points to give for this system'],
   },
+  statusNotAllowed: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Status',
+  }],
+  onlyStatus: {
+    type: Boolean,
+    default: false,
+  },
+  platoons: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Platoon',
+  }],
+  ranks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Rank',
+  }],
   personnels: [
     {
       type: Schema.Types.ObjectId,

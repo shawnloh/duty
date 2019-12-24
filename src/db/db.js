@@ -7,7 +7,6 @@ const seed = require('./seeds/seed');
 // models
 const account = require('../models/account');
 const status = require('../models/status');
-const group = require('../models/group');
 const rank = require('../models/rank');
 const platoon = require('../models/platoon');
 const point = require('../models/point');
@@ -33,7 +32,6 @@ const setupModelsIndex = async () => {
     status.init(),
     rank.init(),
     platoon.init(),
-    group.init(),
     point.init(),
   ]).then(() => {
     // console.log('finished setting up database index');

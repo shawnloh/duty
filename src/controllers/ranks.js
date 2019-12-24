@@ -39,7 +39,7 @@ module.exports.delete = async (req, res, next) => {
     if (!deletedRank) {
       return res.status(400).json({errors: ['Please provide a valid id']});
     }
-    res.status(200).json(deletedRank);
+    res.status(200).json({success: true, deletedRank});
   } catch (error) {
     next(err);
   }

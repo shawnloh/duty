@@ -5,7 +5,7 @@ const personnelStatus = require('./personnelStatus');
 const StatusSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: 'Name is required',
+    required: [true, 'Name is required'],
     unique: true,
     trim: true,
   },
