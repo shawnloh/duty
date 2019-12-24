@@ -8,7 +8,8 @@ const moment = require('moment-timezone');
  * @return {Boolean} true/false
  */
 module.exports.statusBeforeToday = (endDate) => {
-  const now = moment(moment().tz('Asia/Singapore').format('YYYY-MM-DD'));
+  const sgDate = moment().tz('Asia/Singapore').format('YYYY-MM-DD');
+  const now = moment(sgDate);
 
   const end = moment(moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD'));
   // if status end date is before today date, it means this status has expired

@@ -9,26 +9,25 @@ module.exports.getAll = async (req, res, next) => {
   }
 };
 
-module.exports.create = (req, res, next) => {
-  const newstatus = new status({name: req.body.name.trim()});
-  newstatus.save().then(() => {
-    res.status(201).json({message: 'Successfully created status'});
-  }).catch((err) => {
-    if (err.errmsg && err.errmsg.indexOf('duplicate key') != -1) {
-      return res.status(400).json({message: 'Duplicated status'});
-    }
-    next(err);
-  });
+module.exports.create = async (req, res, next) => {
+  try {
+    let newStatus = new status({name: req.body.name.trim()});
+    newStatus = await newStatus.save();
+    res.status(201).json({newStatus});
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports.delete = async (req, res, next) => {
   try {
-    const deletedStatus = await status.findByIdAndRemove(req.params.statusId);
+    const deletedStatus = await status.findById(req.params.statusId).exec();
     if (!deletedStatus) {
       return res.status(400).json({errors: [
         'Please provide a valid status id',
       ]});
     }
+    await deletedStatus.remove();
     res.status(200).json({deletedStatus, deleted: true});
   } catch (error) {
     next(error);

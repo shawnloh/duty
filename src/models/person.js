@@ -25,12 +25,17 @@ const PersonSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'PersonnelPoint',
   }],
-  personnelStatus: [
+  statuses: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'PersonnelStatus',
     },
   ],
 }, {timestamps: true});
+
+PersonSchema.pre('remove', {query: true}, function(next) {
+  this.model('PersonnelPoint').remove({personId: this._id}, next);
+  this.model('PersonnelStatus').remove({personId: this._id}, next);
+});
 
 module.exports = mongoose.model('Person', PersonSchema);

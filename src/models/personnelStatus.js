@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const moment = require('moment-timezone');
+const Person = require('./person');
 const expiry = require('../utils/expiry');
 
 const personnelStatus = new mongoose.Schema({
@@ -42,9 +43,22 @@ const personnelStatus = new mongoose.Schema({
   },
 }, {timestamps: true});
 
-personnelStatus.pre('save', function(next) {
-  this.expired = expiry.statusBeforeToday(this.endDate);
-  next();
+personnelStatus.pre('save', {query: true}, async function() {
+  const current = this;
+  current.expired = expiry.statusBeforeToday(this.endDate);
+  const currentPerson = await Person.findById(current.personId).exec();
+  if (!currentPerson) {
+    throw new Error('Invalid person id');
+  }
+  currentPerson.statuses.push(current._id);
+  await currentPerson.save();
+});
+
+personnelStatus.pre('remove', {query: true}, async function() {
+  const current = this;
+  await Person.updateOne(
+      {_id: current.personId},
+      {$pull: {'statuses': current._id}}).exec();
 });
 
 module.exports = mongoose.model('PersonnelStatus', personnelStatus);
