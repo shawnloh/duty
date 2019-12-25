@@ -30,6 +30,7 @@ router.route('/:platoonId')
     .put(platoonsController.update)
     .delete(platoonsController.delete);
 
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 
 module.exports = router;

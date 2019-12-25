@@ -20,3 +20,7 @@ module.exports.API = (err, req, res, next) => {
 
   res.status(500).json({'message': 'Internal Server Error'});
 };
+
+module.exports.NOT_IMPLEMENTED = (req, res) => {
+  res.status(405).json({message: 'Method not allowed'});
+};

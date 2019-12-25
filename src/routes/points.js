@@ -32,6 +32,7 @@ router.route('/:pointsId')
     pointsController.update)
     .delete(expressValidation, pointsController.delete);
 
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 
 module.exports = router;

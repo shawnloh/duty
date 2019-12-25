@@ -31,5 +31,6 @@ router.route('/:statusId')
       expressValidation,
     ], statusController.update);
 
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 module.exports = router;

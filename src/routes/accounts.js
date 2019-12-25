@@ -30,6 +30,7 @@ router.post('/register', [
 
 router.get('/me', auth, accountController.me);
 router.post('/logout', auth, accountController.logout);
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 
 module.exports = router;

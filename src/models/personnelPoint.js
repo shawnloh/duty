@@ -23,7 +23,12 @@ PersonnelPoint.pre('save', {query: true}, async function() {
   if (!currentPerson) {
     throw new Error('Invalid person id');
   }
-  if (currentPerson.points.indexOf(current._id) <0) {
+
+  const isInArray = currentPerson.points.some((point) => {
+    return point.equals(current._id);
+  });
+
+  if (!isInArray) {
     currentPerson.points.push(current._id);
   }
   await currentPerson.save();

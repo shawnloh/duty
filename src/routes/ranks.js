@@ -29,6 +29,7 @@ router.route('/:rankId')
     .put(ranksController.update)
     .delete(ranksController.delete);
 
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 
 module.exports = router;

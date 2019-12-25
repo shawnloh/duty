@@ -45,6 +45,36 @@ router.post('/new', [
       .withMessage('Person must have a name'),
   expressValidation,
 ], personController.create);
+router.put('/:personId', [
+  param('personId')
+      .isMongoId()
+      .withMessage('Please provide a valid person id'),
+  body('rank')
+      .if((rank, {req}) => req.body.rank)
+      .isMongoId()
+      .withMessage('Please provide a valid rank id')
+      .custom(async (rankId) => {
+        const rank = await rankValidator.exist(rankId);
+        if (!rank) {
+          throw new Error('Rank does not exist, please create one');
+        }
+      }),
+  body('platoon')
+      .if((platoon, {req}) => req.body.platoon)
+      .isMongoId()
+      .withMessage('Please provide a valid platoon id')
+      .custom(async (platoonId) => {
+        const platoon = await platoonValidator.exist(platoonId);
+        if (!platoon) {
+          throw new Error('Platoon does not exist, please create one');
+        }
+      }),
+  body('name')
+      .if((name, {req}) => req.body.name === '')
+      .notEmpty()
+      .withMessage('Name must not be empty'),
+  expressValidation,
+], personController.update);
 
 // Personnel Status Routes
 router.post('/status/:personId/add', [
@@ -115,6 +145,7 @@ router.route('/point/:personId/:personnelPointId')
     ])
     .put(personController.updatePoint);
 
+router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);
 
 module.exports = router;

@@ -84,6 +84,68 @@ module.exports.create = async (req, res, next) => {
   }
 };
 
+module.exports.update = async (req, res, next) => {
+  try {
+    const errors = [];
+    let modified = false;
+    let person = await Person.findById(req.params.personId).exec();
+    if (!person) {
+      errors.push('Invalid person id');
+      return res.status(400).json({errors});
+    }
+
+    if (req.body.rank && !person.rank.equals(req.body.rank)) {
+      person.rank = req.body.rank;
+      modified = true;
+    }
+    if (req.body.platoon && !person.platoon.equals(req.body.platoon)) {
+      person.platoon = req.body.platoon;
+      modified = true;
+    }
+    if (req.body.name && person.name !== req.body.name) {
+      person.name = req.body.name;
+      modified = true;
+    }
+    if (!modified) {
+      return res.status(304).json();
+    }
+
+    person = await person.save();
+    const opts = [
+      {
+        path: 'points',
+        select: '-personId -__v -createdAt -updatedAt',
+        populate: {
+          path: 'pointSystem',
+          model: 'Point',
+          select: '_id name',
+        },
+      },
+      {
+        path: 'statuses',
+        select: '-personId -__v -createdAt -updatedAt',
+        populate: {
+          path: 'statusId',
+          model: 'Status',
+          select: '_id name',
+        },
+      },
+      {
+        path: 'rank',
+        select: '-createdAt -updatedAt -__v',
+      },
+      {
+        path: 'platoon',
+        select: '-createdAt -updatedAt -__v',
+      },
+    ];
+    person = await Person.populate(person, opts);
+
+    res.status(200).json(person);
+  } catch (error) {
+    next(error);
+  }
+};
 /**
  * Personnel Status Route
  */
