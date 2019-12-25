@@ -23,10 +23,10 @@ module.exports.create = async (req, res, next) => {
   try {
     const createdPoint = await new Point(newPointsSystem).save();
     const allPerson = await Person.find({});
-    Promise.all(allPerson.map(async (person) => {
+    await Promise.all(allPerson.map(async (person) => {
       const newPPoint = {
         personId: person._id,
-        pointId: createdPoint._id,
+        pointSystem: createdPoint._id,
         points: 0,
       };
       const createdPersonnelPoint = new personnelPoint(newPPoint);

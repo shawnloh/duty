@@ -1,17 +1,37 @@
 const moment = require('moment-timezone');
-const person = require('../models/person');
-const personnelStatus = require('../models/personnelStatus');
-// const personnelPoint = require('../models/personnelPoint');
+const Promise = require('bluebird');
+const Person = require('../models/person');
+const Point = require('../models/point');
+const PersonnelStatus = require('../models/personnelStatus');
+const PersonnelPoint = require('../models/personnelPoint');
 
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const persons = await person.find({})
-    // .populate('points')
-        .populate('personnelStatus', '-statusId -personId -__v')
-        .populate('rank')
-        .populate('platoon')
-        .select('-__v')
+    const persons = await Person.find({})
+        // .populate('points', '-personId -__v -createdAt -updatedAt')
+        .populate({
+          path: 'points',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'pointSystem',
+            model: 'Point',
+            select: '_id name',
+          },
+        })
+        // .populate('statuses', '-personId -__v -createdAt -updatedAt')
+        .populate({
+          path: 'statuses',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'statusId',
+            model: 'Status',
+            select: '_id name',
+          },
+        })
+        .populate('rank', '-createdAt -updatedAt -__v')
+        .populate('platoon', '-createdAt -updatedAt -__v')
+        .select('-__v -createdAt -updatedAt')
         .exec();
     res.status(200).json(persons);
   } catch (error) {
@@ -21,12 +41,52 @@ module.exports.viewAll = async (req, res, next) => {
 
 module.exports.create = async (req, res, next) => {
   try {
-    const createdPerson = await person.create(req.body);
+    // const createdPerson = await person.create(req.body);
+    let createdPerson = await new Person(req.body).save();
+    const points = await Point.find({}).exec();
+    await Promise.all(points.map((point) => {
+      const newPersonnelPoint = {
+        personId: createdPerson._id,
+        pointSystem: point._id,
+        points: 0,
+      };
+      const createNewPersonnelPoint = new PersonnelPoint(newPersonnelPoint);
+      return createNewPersonnelPoint.save();
+    }));
+
+    createdPerson = await Person.findById(createdPerson._id)
+        .populate({
+          path: 'points',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'pointSystem',
+            model: 'Point',
+            select: '_id name',
+          },
+        })
+        // .populate('statuses', '-personId -__v -createdAt -updatedAt')
+        .populate({
+          path: 'statuses',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'statusId',
+            model: 'Status',
+            select: '_id name',
+          },
+        })
+        .populate('rank', '-createdAt -updatedAt -__v')
+        .populate('platoon', '-createdAt -updatedAt -__v')
+        .select('-__v -createdAt -updatedAt');
+
     res.status(201).json(createdPerson);
   } catch (error) {
     next(error);
   }
 };
+
+/**
+ * Personnel Status Route
+ */
 
 module.exports.addStatus = async (req, res, next) => {
   try {
@@ -38,7 +98,7 @@ module.exports.addStatus = async (req, res, next) => {
       endDate: moment(req.body.endDate, 'DD-MM-YYYY')
           .format('DD-MM-YYYY'),
     };
-    let createdPStatus = new personnelStatus(newPersonnelStatus);
+    let createdPStatus = new PersonnelStatus(newPersonnelStatus);
     createdPStatus = await createdPStatus.save({validateBeforeSave: true});
     res.status(201).json(createdPStatus);
   } catch (error) {
@@ -49,7 +109,7 @@ module.exports.addStatus = async (req, res, next) => {
 module.exports.deleteStatus = async (req, res, next) => {
   try {
     const errors = [];
-    const pStatus = await personnelStatus
+    const pStatus = await PersonnelStatus
         .findById(req.params.personnelStatusId)
         .exec();
 
@@ -67,7 +127,7 @@ module.exports.deleteStatus = async (req, res, next) => {
 module.exports.updateStatus = async (req, res, next) => {
   try {
     const errors= [];
-    const currStatus = await personnelStatus
+    const currStatus = await PersonnelStatus
         .findOne({_id: req.params.personnelStatusId})
         .exec();
     if (!currStatus) {
@@ -86,4 +146,36 @@ module.exports.updateStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * Personnel Point Route
+ */
+
+module.exports.updatePoint = async (req, res, next) => {
+  const {personId, personnelPointId} = req.params;
+  const {points} = req.body;
+  const errors = [];
+  let [person, personnelPoint] = await Promise.all([
+    Person.findById(personId).exec(),
+    PersonnelPoint.findById(personnelPointId).exec(),
+  ]);
+  if (!person) {
+    errors.push('Person id is not valid');
+    return res.status(400).json({errors});
+  }
+  if (!personnelPoint) {
+    errors.push('Personnel point id is not valid');
+    return res.status(400).json({errors});
+  }
+  if (!personnelPoint.personId.equals(person._id)) {
+    errors.push('Invalid request');
+    return res.status(400).json({errors});
+  }
+  if (points === personnelPoint.points) {
+    return res.status(304).json();
+  }
+  personnelPoint.points = points;
+  personnelPoint = await personnelPoint.save();
+  res.status(200).json({success: true, personnelPoint});
 };

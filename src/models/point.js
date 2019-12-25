@@ -14,7 +14,7 @@ const PointSchema = new Schema({
 
 PointSchema.pre('remove', {query: true}, async function() {
   const current = this;
-  const found = await PersonnelPoint.find({pointId: current._id}).exec();
+  const found = await PersonnelPoint.find({pointSystem: current._id}).exec();
 
   Promise.all(found.map(async (doc) => {
     await doc.remove();

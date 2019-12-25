@@ -18,7 +18,7 @@ router.get('/', personController.viewAll);
 router.post('/new', [
   body('rank')
       .isMongoId()
-      .withMessage('Rank is required to create new person')
+      .withMessage('Please provide a valid rank id')
       .notEmpty()
       .withMessage('Rank is required to create new person')
       .custom(async (rankId) => {
@@ -29,9 +29,9 @@ router.post('/new', [
       }),
   body('platoon')
       .isMongoId()
-      .withMessage('Person must have a platoon assigned')
+      .withMessage('Please provide a valid platoon id')
       .notEmpty()
-      .withMessage('Person must have a platoon assigned')
+      .withMessage('Platoon is required to create new person')
       .custom(async (platoonId) => {
         const platoon = await platoonValidator.exist(platoonId);
         if (!platoon) {
@@ -47,7 +47,7 @@ router.post('/new', [
 ], personController.create);
 
 // Personnel Status Routes
-router.post('/:personId/addstatus', [
+router.post('/status/:personId/add', [
   param('personId')
       .isMongoId()
       .withMessage('Invalid person id'),
@@ -85,18 +85,35 @@ router.post('/:personId/addstatus', [
   expressValidation,
 ], personController.addStatus);
 
-router.route('/:personId/:personnelStatusId')
+router.route('/status/:personId/:personnelStatusId')
     .all([
       param('personnelStatusId')
           .isMongoId()
           .withMessage('Please provide a valid personnel status id'),
       param('personId')
           .isMongoId()
-          .withMessage('Please provide a valid peson id'),
+          .withMessage('Please provide a valid person id'),
       expressValidation,
     ])
     .delete(personController.deleteStatus)
     .put(personController.updateStatus);
+
+router.route('/point/:personId/:personnelPointId')
+    .all([
+      param('personnelPointId')
+          .isMongoId()
+          .withMessage('Please provide a valid personnel point id'),
+      param('personId')
+          .isMongoId()
+          .withMessage('Please provide a valid person id'),
+      body('points')
+          .notEmpty()
+          .withMessage('Please provide a points to update personnel')
+          .isNumeric({no_symbols: true})
+          .withMessage('Please provide only numeric number for point'),
+      expressValidation,
+    ])
+    .put(personController.updatePoint);
 
 router.use(errorHandler.API);
 

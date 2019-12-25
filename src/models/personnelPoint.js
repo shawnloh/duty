@@ -3,13 +3,13 @@ const Person = require('./person');
 const Schema = mongoose.Schema;
 
 const PersonnelPoint = new Schema({
+  pointSystem: {
+    type: Schema.Types.ObjectId,
+    ref: 'Point',
+  },
   personId: {
     type: Schema.Types.ObjectId,
     ref: 'Person',
-  },
-  pointId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Point',
   },
   points: {
     type: Number,
@@ -23,7 +23,9 @@ PersonnelPoint.pre('save', {query: true}, async function() {
   if (!currentPerson) {
     throw new Error('Invalid person id');
   }
-  currentPerson.points.push(current._id);
+  if (currentPerson.points.indexOf(current._id) <0) {
+    currentPerson.points.push(current._id);
+  }
   await currentPerson.save();
 });
 
@@ -31,11 +33,8 @@ PersonnelPoint.pre('remove', {query: true}, async function() {
   const current = this;
   await Person.updateOne(
       {_id: current.personId},
-      {
-        $pull: {
-          'points': current._id,
-        },
-      }).exec();
+      {$pull: {'points': current._id}})
+      .exec();
 });
 
 module.exports = mongoose.model('PersonnelPoint', PersonnelPoint);
