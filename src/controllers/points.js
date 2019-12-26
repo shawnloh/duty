@@ -5,7 +5,7 @@ const personnelPoint = require('../models/personnelPoint');
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const points = await Point.find({}).exec();
+    const points = await Point.find({}).lean().exec();
     res.status(200).json(points);
   } catch (error) {
     next(error);

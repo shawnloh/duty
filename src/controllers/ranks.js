@@ -3,7 +3,7 @@ const rankValidator = require('../validators/rankValidator');
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const ranks = await rank.find({}).exec();
+    const ranks = await rank.find({}).lean().select('_id name').exec();
     res.status(200).json(ranks);
   } catch (error) {
     next(error);

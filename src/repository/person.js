@@ -47,6 +47,7 @@ class PersonRepository {
         .populate('rank', '-createdAt -updatedAt -__v')
         .populate('platoon', '-createdAt -updatedAt -__v')
         .select('-__v -createdAt -updatedAt')
+        .lean()
         .exec();
   }
   static async findById(id) {

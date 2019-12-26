@@ -3,7 +3,7 @@ const platoonValidator = require('../validators/platoonValidator');
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const platoons = await platoon.find({}).exec();
+    const platoons = await platoon.find({}).lean().select('_id name').exec();
     res.status(200).json(platoons);
   } catch (error) {
     next(error);

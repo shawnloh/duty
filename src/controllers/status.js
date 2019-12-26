@@ -1,8 +1,12 @@
-const status = require('../models/status');
+const Status = require('../models/status');
 
 module.exports.getAll = async (req, res, next) => {
   try {
-    const statuses = await status.find({}).sort({createdAt: -1});
+    const statuses = await Status.find({})
+        .lean()
+        .sort({createdAt: -1})
+        .select('_id name')
+        .exec();
     res.json(statuses);
   } catch (error) {
     next(error);
@@ -11,7 +15,7 @@ module.exports.getAll = async (req, res, next) => {
 
 module.exports.create = async (req, res, next) => {
   try {
-    let newStatus = new status({name: req.body.name.trim()});
+    let newStatus = new Status({name: req.body.name.trim()});
     newStatus = await newStatus.save();
     res.status(201).json({newStatus});
   } catch (error) {
@@ -21,7 +25,7 @@ module.exports.create = async (req, res, next) => {
 
 module.exports.delete = async (req, res, next) => {
   try {
-    const deletedStatus = await status.findById(req.params.statusId).exec();
+    const deletedStatus = await Status.findById(req.params.statusId).exec();
     if (!deletedStatus) {
       return res.status(400).json({errors: [
         'Please provide a valid status id',
@@ -36,7 +40,7 @@ module.exports.delete = async (req, res, next) => {
 
 module.exports.update = async (req, res, next) => {
   try {
-    const updatedStatus = await status
+    const updatedStatus = await Status
         .findByIdAndUpdate(req.params.statusId,
             {name: req.body.name},
             {new: true});
