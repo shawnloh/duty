@@ -19,6 +19,7 @@ const AccountSchema = new Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  lastLoginIp: String,
   token: String,
 }, {timestamps: true});
 

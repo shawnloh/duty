@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+/**
+ * @class Person
+ */
 const PersonSchema = new Schema({
   rank: {
     type: Schema.Types.ObjectId,
@@ -32,10 +35,5 @@ const PersonSchema = new Schema({
     },
   ],
 }, {timestamps: true});
-
-PersonSchema.pre('remove', {query: true}, function(next) {
-  this.model('PersonnelPoint').remove({personId: this._id}, next);
-  this.model('PersonnelStatus').remove({personId: this._id}, next);
-});
 
 module.exports = mongoose.model('Person', PersonSchema);

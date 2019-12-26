@@ -9,6 +9,17 @@ const platoonValidator = require('../validators/platoonValidator');
 const status = require('../models/status');
 const personController = require('../controllers/person');
 
+const errorMessages = {
+  INVALID_START_DATE: 'Invalid start date, DD-MM-YYYY format only',
+  INVALID_END_DATE: 'Invalid end date, DD-MM-YYYY format only',
+  INVALID_STATUS_ID: 'Invalid status id',
+  INVALID_RANK_ID: 'Invalid rank id',
+  INVALID_PLATOON_ID: 'Invalid platoon id',
+  INVALID_PERSON_ID: 'Invalid person id',
+  INVALID_PSTATUS_ID: 'Invalid personnel status id',
+  INVALID_PPOINT_ID: 'Invalid personnel point id',
+};
+
 const router = Router();
 
 
@@ -48,7 +59,7 @@ router.post('/new', [
 router.put('/:personId', [
   param('personId')
       .isMongoId()
-      .withMessage('Please provide a valid person id'),
+      .withMessage(errorMessages.INVALID_PERSON_ID),
   body('rank')
       .if((rank, {req}) => req.body.rank)
       .isMongoId()
@@ -56,7 +67,7 @@ router.put('/:personId', [
       .custom(async (rankId) => {
         const rank = await rankValidator.exist(rankId);
         if (!rank) {
-          throw new Error('Rank does not exist, please create one');
+          throw new Error(errorMessages.INVALID_RANK_ID);
         }
       }),
   body('platoon')
@@ -66,7 +77,7 @@ router.put('/:personId', [
       .custom(async (platoonId) => {
         const platoon = await platoonValidator.exist(platoonId);
         if (!platoon) {
-          throw new Error('Platoon does not exist, please create one');
+          throw new Error(errorMessages.INVALID_PLATOON_ID);
         }
       }),
   body('name')
@@ -76,21 +87,28 @@ router.put('/:personId', [
   expressValidation,
 ], personController.update);
 
+router.delete('/:personId', [
+  param('personId')
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_PERSON_ID),
+  expressValidation,
+], personController.delete);
+
 // Personnel Status Routes
 router.post('/status/:personId/add', [
   param('personId')
       .isMongoId()
-      .withMessage('Invalid person id'),
+      .withMessage(errorMessages.INVALID_PERSON_ID),
   body('statusId')
       .notEmpty()
       .withMessage('Status id is required')
       .isMongoId()
-      .withMessage('Please provide a valid id')
+      .withMessage(errorMessages.INVALID_STATUS_ID)
       .custom(async (statusId) => {
         const foundStatus = await status.findById(statusId).exec();
         if (!foundStatus) {
           return Promise.reject(
-              new Error('Invalid status id, make sure you add status first'),
+              new Error(errorMessages.INVALID_STATUS_ID),
           );
         }
       }),
@@ -98,8 +116,8 @@ router.post('/status/:personId/add', [
       .notEmpty()
       .withMessage('Start date is required')
       .custom((startDate) => {
-        if (!moment(startDate, 'DD-MM-YYYY').isValid()) {
-          throw new Error('Invalid start date, please use DD-MM-YYYY format');
+        if (!moment(startDate, 'DD-MM-YYYY', true).isValid()) {
+          throw new Error(errorMessages.INVALID_START_DATE);
         }
         return true;
       }),
@@ -107,8 +125,8 @@ router.post('/status/:personId/add', [
       .notEmpty()
       .withMessage('End date is required')
       .custom((endDate) => {
-        if (!moment(endDate, 'DD-MM-YYYY').isValid()) {
-          throw new Error('Invalid end date, please use DD-MM-YYYY format');
+        if (!moment(endDate, 'DD-MM-YYYY', true).isValid()) {
+          throw new Error(errorMessages.INVALID_END_DATE);
         }
         return true;
       }),
@@ -119,10 +137,34 @@ router.route('/status/:personId/:personnelStatusId')
     .all([
       param('personnelStatusId')
           .isMongoId()
-          .withMessage('Please provide a valid personnel status id'),
+          .withMessage(errorMessages.INVALID_PSTATUS_ID),
       param('personId')
           .isMongoId()
-          .withMessage('Please provide a valid person id'),
+          .withMessage(errorMessages.INVALID_PERSON_ID),
+      body('startDate')
+          .if((value, {req}) => req.method === 'PUT')
+          .if(body('startDate').exists())
+          .notEmpty()
+          .withMessage('Start date must not be empty')
+          .custom((startDate) => {
+            if (!moment(startDate, 'DD-MM-YYYY', true).isValid()) {
+              throw new Error(errorMessages.INVALID_START_DATE);
+            }
+            return true;
+          }),
+      body('endDate')
+          .if((value, {req}) => {
+            return req.method === 'PUT';
+          })
+          .if(body('endDate').exists())
+          .notEmpty()
+          .withMessage('End date must not be empty')
+          .custom((endDate) => {
+            if (!moment(endDate, 'DD-MM-YYYY', true).isValid()) {
+              throw new Error(errorMessages.INVALID_END_DATE);
+            }
+            return true;
+          }),
       expressValidation,
     ])
     .delete(personController.deleteStatus)

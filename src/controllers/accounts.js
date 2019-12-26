@@ -5,6 +5,7 @@ module.exports.login = async (req, res, next) => {
   // Login a registered user
   try {
     const {username, password} = req.body;
+
     if (!username || !password) {
       return res
           .status(401)
@@ -12,12 +13,22 @@ module.exports.login = async (req, res, next) => {
     }
 
     const user = await Account.findByCredentials(username, password);
+
     if (!user) {
       return res
           .status(401)
           .json({errors: ['Login failed! Check authentication credentials']});
     }
+    if (process.env.NODE_ENV !== 'test') {
+      if (req.headers['x-forwarded-for']) {
+        user.lastLoginIp = ipAddr;
+      } else {
+        user.lastLoginIp = req.connection.remoteAddress;
+      }
+    }
 
+
+    await user.save();
     const token = await user.generateAuthToken();
     res.status(200).json({token});
   } catch (error) {

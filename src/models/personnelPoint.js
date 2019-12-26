@@ -19,7 +19,7 @@ const PersonnelPoint = new Schema({
 
 PersonnelPoint.pre('save', {query: true}, async function() {
   const current = this;
-  const currentPerson = await Person.findById(current.personId).exec();
+  const currentPerson = await Person.findOne({_id: current.personId}).exec();
   if (!currentPerson) {
     throw new Error('Invalid person id');
   }

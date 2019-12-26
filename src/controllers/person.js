@@ -1,38 +1,13 @@
 const moment = require('moment-timezone');
 const Promise = require('bluebird');
+const PersonRepository = require('../repository/person');
 const Person = require('../models/person');
-const Point = require('../models/point');
-const PersonnelStatus = require('../models/personnelStatus');
 const PersonnelPoint = require('../models/personnelPoint');
 
 
 module.exports.viewAll = async (req, res, next) => {
   try {
-    const persons = await Person.find({})
-        // .populate('points', '-personId -__v -createdAt -updatedAt')
-        .populate({
-          path: 'points',
-          select: '-personId -__v -createdAt -updatedAt',
-          populate: {
-            path: 'pointSystem',
-            model: 'Point',
-            select: '_id name',
-          },
-        })
-        // .populate('statuses', '-personId -__v -createdAt -updatedAt')
-        .populate({
-          path: 'statuses',
-          select: '-personId -__v -createdAt -updatedAt',
-          populate: {
-            path: 'statusId',
-            model: 'Status',
-            select: '_id name',
-          },
-        })
-        .populate('rank', '-createdAt -updatedAt -__v')
-        .populate('platoon', '-createdAt -updatedAt -__v')
-        .select('-__v -createdAt -updatedAt')
-        .exec();
+    const persons = await PersonRepository.findAll();
     res.status(200).json(persons);
   } catch (error) {
     next(error);
@@ -41,44 +16,8 @@ module.exports.viewAll = async (req, res, next) => {
 
 module.exports.create = async (req, res, next) => {
   try {
-    // const createdPerson = await person.create(req.body);
-    let createdPerson = await new Person(req.body).save();
-    const points = await Point.find({}).exec();
-    await Promise.all(points.map((point) => {
-      const newPersonnelPoint = {
-        personId: createdPerson._id,
-        pointSystem: point._id,
-        points: 0,
-      };
-      const createNewPersonnelPoint = new PersonnelPoint(newPersonnelPoint);
-      return createNewPersonnelPoint.save();
-    }));
-
-    createdPerson = await Person.findById(createdPerson._id)
-        .populate({
-          path: 'points',
-          select: '-personId -__v -createdAt -updatedAt',
-          populate: {
-            path: 'pointSystem',
-            model: 'Point',
-            select: '_id name',
-          },
-        })
-        // .populate('statuses', '-personId -__v -createdAt -updatedAt')
-        .populate({
-          path: 'statuses',
-          select: '-personId -__v -createdAt -updatedAt',
-          populate: {
-            path: 'statusId',
-            model: 'Status',
-            select: '_id name',
-          },
-        })
-        .populate('rank', '-createdAt -updatedAt -__v')
-        .populate('platoon', '-createdAt -updatedAt -__v')
-        .select('-__v -createdAt -updatedAt');
-
-    res.status(201).json(createdPerson);
+    const newPerson = await PersonRepository.create(req.body);
+    res.status(201).json(newPerson);
   } catch (error) {
     next(error);
   }
@@ -87,61 +26,38 @@ module.exports.create = async (req, res, next) => {
 module.exports.update = async (req, res, next) => {
   try {
     const errors = [];
-    let modified = false;
-    let person = await Person.findById(req.params.personId).exec();
-    if (!person) {
+    const person = await PersonRepository.update(
+        req.params.personId,
+        req.body.name,
+        req.body.rank,
+        req.body.platoon,
+    );
+
+    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
       errors.push('Invalid person id');
       return res.status(400).json({errors});
     }
 
-    if (req.body.rank && !person.rank.equals(req.body.rank)) {
-      person.rank = req.body.rank;
-      modified = true;
-    }
-    if (req.body.platoon && !person.platoon.equals(req.body.platoon)) {
-      person.platoon = req.body.platoon;
-      modified = true;
-    }
-    if (req.body.name && person.name !== req.body.name) {
-      person.name = req.body.name;
-      modified = true;
-    }
-    if (!modified) {
+    if (!person) {
       return res.status(304).json();
     }
 
-    person = await person.save();
-    const opts = [
-      {
-        path: 'points',
-        select: '-personId -__v -createdAt -updatedAt',
-        populate: {
-          path: 'pointSystem',
-          model: 'Point',
-          select: '_id name',
-        },
-      },
-      {
-        path: 'statuses',
-        select: '-personId -__v -createdAt -updatedAt',
-        populate: {
-          path: 'statusId',
-          model: 'Status',
-          select: '_id name',
-        },
-      },
-      {
-        path: 'rank',
-        select: '-createdAt -updatedAt -__v',
-      },
-      {
-        path: 'platoon',
-        select: '-createdAt -updatedAt -__v',
-      },
-    ];
-    person = await Person.populate(person, opts);
-
     res.status(200).json(person);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.delete = async (req, res, next) => {
+  try {
+    const person = await PersonRepository.delete(req.params.personId);
+    const errors = [];
+    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
+      errors.push('Invalid person id');
+      return res.status(400).json({errors});
+    }
+
+    return res.status(200).json({success: true, person: person._id});
   } catch (error) {
     next(error);
   }
@@ -152,7 +68,14 @@ module.exports.update = async (req, res, next) => {
 
 module.exports.addStatus = async (req, res, next) => {
   try {
-    const newPersonnelStatus = {
+    const errors = [];
+    const person = PersonRepository.findById(req.params.personId);
+    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
+      errors.push('Invalid person id');
+      return res.status(400).json({errors});
+    }
+
+    let newStatus = {
       personId: req.params.personId,
       statusId: req.body.statusId,
       startDate: moment(req.body.startDate, 'DD-MM-YYYY')
@@ -160,9 +83,8 @@ module.exports.addStatus = async (req, res, next) => {
       endDate: moment(req.body.endDate, 'DD-MM-YYYY')
           .format('DD-MM-YYYY'),
     };
-    let createdPStatus = new PersonnelStatus(newPersonnelStatus);
-    createdPStatus = await createdPStatus.save({validateBeforeSave: true});
-    res.status(201).json(createdPStatus);
+    newStatus = await PersonRepository.addStatus(newStatus);
+    res.status(201).json(newStatus);
   } catch (error) {
     next(error);
   }
@@ -171,16 +93,25 @@ module.exports.addStatus = async (req, res, next) => {
 module.exports.deleteStatus = async (req, res, next) => {
   try {
     const errors = [];
-    const pStatus = await PersonnelStatus
-        .findById(req.params.personnelStatusId)
-        .exec();
+    const pStatus = await PersonRepository
+        .deleteStatus(
+            req.params.personId,
+            req.params.personnelStatusId,
+        );
 
-    if (!pStatus) {
-      errors.push('Invalid personnel status id');
-      return res.status(400).json(errors);
+    switch (pStatus) {
+      case PersonRepository.errors.NO_SUCH_PERSON:
+        errors.push('Invalid person id');
+        return res.status(400).json({errors});
+      case PersonRepository.errors.NO_SUCH_STATUS:
+        errors.push('Invalid personnel status id');
+        return res.status(400).json({errors});
+      case PersonRepository.errors.BAD_REQUEST:
+        errors.push('Please double check status and person id');
+        return res.status(400).json({errors});
+      default:
+        res.status(200).json({success: true, personnelStatus: pStatus});
     }
-    await pStatus.remove();
-    res.status(200).json({success: true, pStatus});
   } catch (error) {
     next(error);
   }
@@ -189,22 +120,27 @@ module.exports.deleteStatus = async (req, res, next) => {
 module.exports.updateStatus = async (req, res, next) => {
   try {
     const errors= [];
-    const currStatus = await PersonnelStatus
-        .findOne({_id: req.params.personnelStatusId})
-        .exec();
-    if (!currStatus) {
-      errors.push('Invalid personnel status id');
-      return res.status(400).json(errors);
+    if (!req.body.startDate && !req.body.endDate) {
+      return res.status(304).json();
     }
-    if (req.body.startDate) {
-      currStatus.startDate = req.body.startDate;
+    const pStatus = await PersonRepository.updateStatus(
+        req.params.personId,
+        req.params.personnelStatusId,
+        req.body,
+    );
+    switch (pStatus) {
+      case PersonRepository.errors.NO_SUCH_PERSON:
+        errors.push('Invalid person id');
+        return res.status(400).json({errors});
+      case PersonRepository.errors.NO_SUCH_STATUS:
+        errors.push('Invalid personnel status id');
+        return res.status(400).json({errors});
+      case PersonRepository.errors.BAD_REQUEST:
+        errors.push('Please double check status and person id');
+        return res.status(400).json({errors});
+      default:
+        res.status(200).json({success: true, personnelStatus: pStatus});
     }
-    if (req.body.endDate) {
-      currStatus.endDate = req.body.endDate;
-    }
-
-    await currStatus.save({validateBeforeSave: true});
-    res.status(200).json(currStatus);
   } catch (error) {
     next(error);
   }

@@ -21,15 +21,16 @@ describe('Login', () => {
     await account.create({username: 'user', password: '123'});
     await account.create({username: 'admin', password: '123', role: 'admin'});
   });
-  afterEach(async () => {
-    await account.deleteMany({}).exec();
-  });
+
   describe('Insufficient data', () => {
     let req = {
       body: {},
     }; let res; let next;
     beforeEach(() => {
       req = {
+        headers: {
+          'x-forwarded-for': '12345',
+        },
         body: {},
       };
       res = mock.response();
@@ -79,6 +80,9 @@ describe('Login', () => {
     });
     describe('Invalid Credentials', () => {
       const req = {
+        headers: {
+          'x-forwarded-for': '12345',
+        },
         body: {
           username: 'lala',
           password: '123',
@@ -101,6 +105,9 @@ describe('Login', () => {
     describe('Correct credentials', () => {
       let res; let next;
       const req = {
+        headers: {
+          'x-forwarded-for': '12345',
+        },
         body: {
           username: 'user',
           password: '123',
@@ -124,6 +131,10 @@ describe('Login', () => {
         expect(res.json).toBeCalledWith({'token': user.token});
       });
     });
+  });
+
+  afterEach(async () => {
+    await account.deleteMany({}).exec();
   });
 });
 
@@ -247,9 +258,7 @@ describe('Logout', () => {
     res = mock.response();
     next = jest.fn();
   });
-  afterEach(async () => {
-    // await account.deleteMany({}).exec();
-  });
+
 
   test('Should delete token in db', async () => {
     const users = await account.find({username: 'user'}).exec();
@@ -257,5 +266,9 @@ describe('Logout', () => {
       user: users[0],
     };
     await logout(req, res, next);
+  });
+
+  afterEach(async () => {
+    await account.deleteMany({}).exec();
   });
 });
