@@ -130,9 +130,9 @@ class PersonRepository {
     return null;
   }
 
-  static async findStatus(statusId) {
+  static async findStatus(personId, statusId) {
     const pStatus = await PersonnelStatus
-        .findById(statusId)
+        .findOne({personId, _id: statusId})
         .exec();
     if (!pStatus) {
       return PersonRepository.errors.NO_SUCH_STATUS;
@@ -150,13 +150,8 @@ class PersonRepository {
       return PersonRepository.errors.BAD_REQUEST;
     }
 
-    let [person, pStatus] = await Promise.all([
-      this.findById(personId),
-      this.findStatus(statusId)]);
+    let pStatus = await this.findStatus(personId, statusId);
 
-    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
-      return PersonRepository.errors.NO_SUCH_PERSON;
-    }
     if (pStatus === PersonRepository.errors.NO_SUCH_STATUS) {
       return PersonRepository.errors.NO_SUCH_STATUS;
     }
@@ -173,13 +168,8 @@ class PersonRepository {
       return PersonRepository.errors.BAD_REQUEST;
     }
 
-    let [person, pStatus] = await Promise.all([
-      this.findById(personId),
-      this.findStatus(statusId)]);
+    let pStatus = await this.findStatus(personId, statusId);
 
-    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
-      return PersonRepository.errors.NO_SUCH_PERSON;
-    }
     if (pStatus === PersonRepository.errors.NO_SUCH_STATUS) {
       return PersonRepository.errors.NO_SUCH_STATUS;
     }
@@ -198,11 +188,27 @@ class PersonRepository {
     }
 
     if (!modified) {
-      return pStatus;
+      return PersonRepository.errors.NOT_MODIFIED;
     }
 
     pStatus = await pStatus.save({validateBeforeSave: true});
     return pStatus;
+  }
+
+  static async updatePoint(personId, pPointId, newPoints) {
+    let personnelPoint = await PersonnelPoint
+        .findOne({personId, _id: pPointId})
+        .exec();
+
+    if (!personnelPoint) {
+      return PersonRepository.errors.NO_SUCH_POINT;
+    };
+    if (personnelPoint.points === newPoints) {
+      return PersonRepository.errors.NOT_MODIFIED;
+    }
+    personnelPoint.points = newPoints;
+    personnelPoint = await personnelPoint.save();
+    return personnelPoint;
   }
 }
 
@@ -211,6 +217,7 @@ PersonRepository.errors = {
   NO_SUCH_STATUS: 'NO SUCH STATUS',
   NO_SUCH_POINT: 'NO SUCH POINT',
   BAD_REQUEST: 'BAD REQUEST',
+  NOT_MODIFIED: 'NOT_MODIFIED',
 };
 
 module.exports = PersonRepository;

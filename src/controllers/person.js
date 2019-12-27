@@ -1,8 +1,5 @@
 const moment = require('moment-timezone');
-const Promise = require('bluebird');
 const PersonRepository = require('../repository/person');
-const Person = require('../models/person');
-const PersonnelPoint = require('../models/personnelPoint');
 
 
 module.exports.viewAll = async (req, res, next) => {
@@ -129,14 +126,11 @@ module.exports.updateStatus = async (req, res, next) => {
         req.body,
     );
     switch (pStatus) {
-      case PersonRepository.errors.NO_SUCH_PERSON:
-        errors.push('Invalid person id');
-        return res.status(400).json({errors});
+      case PersonRepository.errors.NOT_MODIFIED:
+        return res.status(304).json();
       case PersonRepository.errors.NO_SUCH_STATUS:
-        errors.push('Invalid personnel status id');
-        return res.status(400).json({errors});
       case PersonRepository.errors.BAD_REQUEST:
-        errors.push('Please double check status and person id');
+        errors.push('Please double check personnel status and person id');
         return res.status(400).json({errors});
       default:
         res.status(200).json({success: true, personnelStatus: pStatus});
@@ -151,29 +145,21 @@ module.exports.updateStatus = async (req, res, next) => {
  */
 
 module.exports.updatePoint = async (req, res, next) => {
-  const {personId, personnelPointId} = req.params;
-  const {points} = req.body;
-  const errors = [];
-  let [person, personnelPoint] = await Promise.all([
-    Person.findById(personId).exec(),
-    PersonnelPoint.findById(personnelPointId).exec(),
-  ]);
-  if (!person) {
-    errors.push('Person id is not valid');
-    return res.status(400).json({errors});
+  try {
+    const {personId, personnelPointId} = req.params;
+    const {points} = req.body;
+    const errors = [];
+    const pPoint = await PersonRepository
+        .updatePoint(personId, personnelPointId, points);
+    if (pPoint === PersonRepository.errors.NO_SUCH_POINT) {
+      errors.push('Please double check your person and personnel point id');
+      return res.status(400).json({errors});
+    }
+    if (pPoint === PersonRepository.errors.NOT_MODIFIED) {
+      return res.status(304).json();
+    }
+    res.status(200).json({success: true, personnelPoint: pPoint});
+  } catch (error) {
+    next(error);
   }
-  if (!personnelPoint) {
-    errors.push('Personnel point id is not valid');
-    return res.status(400).json({errors});
-  }
-  if (!personnelPoint.personId.equals(person._id)) {
-    errors.push('Invalid request');
-    return res.status(400).json({errors});
-  }
-  if (points === personnelPoint.points) {
-    return res.status(304).json();
-  }
-  personnelPoint.points = points;
-  personnelPoint = await personnelPoint.save();
-  res.status(200).json({success: true, personnelPoint});
 };
