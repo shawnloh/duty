@@ -1,6 +1,6 @@
 const {Router} = require('express');
 const {body, param} = require('express-validator');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const expressValidation = require('../middleware/expressValidation');
 const errorHandler = require('../middleware/errorHandler');
 const auth = require('../middleware/auth');
@@ -18,6 +18,9 @@ const errorMessages = {
   INVALID_PERSON_ID: 'Invalid person id',
   INVALID_PSTATUS_ID: 'Invalid personnel status id',
   INVALID_PPOINT_ID: 'Invalid personnel point id',
+  INVALID_START_DATE_TODAY: 'Start date must not be before today',
+  INVALID_END_DATE_BEFORE_START_DATE:
+    'End date must not be same or before start date',
 };
 
 const router = Router();
@@ -186,6 +189,47 @@ router.route('/point/:personId/:personnelPointId')
       expressValidation,
     ])
     .put(personController.updatePoint);
+
+router.post('/:personId/blockout', [
+  param('personId')
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_PERSON_ID),
+  body('startDate')
+      .notEmpty()
+      .withMessage('startDate is required')
+      .custom((value) => {
+        if (!moment(value, 'DD-MM-YYYY', true).isValid()) {
+          throw new Error(errorMessages.INVALID_START_DATE);
+        }
+
+        const startDate = moment(value, 'DD-MM-YYYY', true);
+        const today = moment().tz('Asia/Singapore').format('DD-MM-YYYY');
+
+        if (startDate.isBefore(moment(today, 'DD-MM-YYYY', true))) {
+          throw new Error(errorMessages.INVALID_START_DATE_TODAY);
+        }
+        return true;
+      }),
+  body('endDate')
+      .if(body('endDate').exists())
+      .custom((value, {req}) => {
+        if (!moment(value, 'DD-MM-YYYY', true).isValid()) {
+          throw new Error(errorMessages.INVALID_END_DATE);
+        }
+        if (!req.body.startDate) {
+          throw new Error('startDate must exist if endDate is provided');
+        }
+        const startDate = moment(req.body.startDate, 'DD-MM-YYYY', true);
+        const endDate = moment(value, 'DD-MM-YYYY', true);
+
+        if (startDate.isSameOrAfter(endDate)) {
+          throw new Error(errorMessages.INVALID_END_DATE_BEFORE_START_DATE);
+        }
+        return true;
+      }),
+  expressValidation,
+], personController.addBlockDates);
+
 
 router.use(errorHandler.NOT_IMPLEMENTED);
 router.use(errorHandler.API);

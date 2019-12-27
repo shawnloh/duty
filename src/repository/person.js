@@ -3,6 +3,7 @@ const Person = require('../models/person');
 const Point = require('../models/point');
 const PersonnelPoint = require('../models/personnelPoint');
 const PersonnelStatus = require('../models/personnelStatus');
+const dates = require('../utils/dates');
 
 const addPointSystem = async (personId) => {
   try {
@@ -209,6 +210,47 @@ class PersonRepository {
     personnelPoint.points = newPoints;
     personnelPoint = await personnelPoint.save();
     return personnelPoint;
+  }
+
+  static async addBlockout(personId, startDate, endDate=null) {
+    let person = await this.findById(personId);
+    if (!person) {
+      return PersonRepository.errors.NO_SUCH_PERSON;
+    }
+    if (!endDate && person.blockOutDates.indexOf(startDate) >=0) {
+      return PersonRepository.errors.NOT_MODIFIED;
+    }
+    let datesToAdd = [startDate];
+    if (endDate) {
+      datesToAdd = datesToAdd.concat(dates.getAllDates(startDate, endDate));
+    }
+
+    person = await Person.findOneAndUpdate(
+        {_id: person._id},
+        {$addToSet: {blockOutDates: {$each: datesToAdd}}},
+        {new: true})
+        .populate({
+          path: 'points',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'pointSystem',
+            model: 'Point',
+            select: '_id name',
+          },
+        })
+        .populate({
+          path: 'statuses',
+          select: '-personId -__v -createdAt -updatedAt',
+          populate: {
+            path: 'statusId',
+            model: 'Status',
+            select: '_id name',
+          },
+        })
+        .populate('rank', '-createdAt -updatedAt -__v')
+        .populate('platoon', '-createdAt')
+        .exec();
+    return person;
   }
 }
 

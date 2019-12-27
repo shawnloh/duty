@@ -11,7 +11,7 @@ module.exports.statusBeforeToday = (endDate) => {
   const sgDate = moment().tz('Asia/Singapore').format('YYYY-MM-DD');
   const now = moment(sgDate);
 
-  const end = moment(moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD'));
+  const end = moment(moment(endDate, 'DD-MM-YYYY', true).format('YYYY-MM-DD'));
   // if status end date is before today date, it means this status has expired
   if (end.isBefore(now)) {
     return true;
