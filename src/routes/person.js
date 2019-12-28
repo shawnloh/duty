@@ -21,6 +21,7 @@ const errorMessages = {
   INVALID_START_DATE_TODAY: 'Start date must not be before today',
   INVALID_END_DATE_BEFORE_START_DATE:
     'End date must not be same or before start date',
+  INVALID_DATE: 'Invalid date, DD-MM-YYYY format only',
 };
 
 const router = Router();
@@ -229,6 +230,22 @@ router.post('/:personId/blockout', [
       }),
   expressValidation,
 ], personController.addBlockDates);
+
+router.delete('/:personId/blockout', [
+  param('personId')
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_PERSON_ID),
+  body('date')
+      .notEmpty()
+      .withMessage('Date is required to remove blockout')
+      .custom((value) => {
+        if (!moment(value, 'DD-MM-YYYY', true).isValid()) {
+          throw new Error(errorMessages.INVALID_DATE);
+        }
+        return true;
+      }),
+  expressValidation,
+], personController.removeBlockoutDate);
 
 
 router.use(errorHandler.NOT_IMPLEMENTED);

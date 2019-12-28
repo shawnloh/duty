@@ -252,6 +252,19 @@ class PersonRepository {
         .exec();
     return person;
   }
+
+  static async removeBlockout(personId, dateToRemove) {
+    let person = await this.findById(personId);
+    if (!person) {
+      return PersonRepository.errors.NO_SUCH_PERSON;
+    }
+    if (person.blockOutDates.indexOf(dateToRemove) < 0) {
+      return PersonRepository.errors.NOT_MODIFIED;
+    }
+    person.blockOutDates.pull(dateToRemove);
+    person = await person.save();
+    return person;
+  }
 }
 
 PersonRepository.errors = {

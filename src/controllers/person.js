@@ -190,3 +190,23 @@ module.exports.addBlockDates = async (req, res, next) => {
     next(error);
   }
 };
+
+
+module.exports.removeBlockoutDate = async (req, res, next) => {
+  try {
+    const errors= [];
+    const {personId} = req.params;
+    const {date} = req.body;
+    const person = await PersonRepository.removeBlockout(personId, date);
+    if (person === PersonRepository.errors.NO_SUCH_PERSON) {
+      errors.push('Please provide a valid person id');
+      return res.status(400).json({errors});
+    }
+    if (person === PersonRepository.errors.NOT_MODIFIED) {
+      return res.status(304).json();
+    }
+    res.status(200).json(person);
+  } catch (error) {
+    next(error);
+  }
+};
