@@ -34,6 +34,10 @@ const PersonSchema = new Schema({
       ref: 'PersonnelStatus',
     },
   ],
+  lastEventDate: {
+    type: String,
+    default: null,
+  },
 }, {timestamps: true});
 
 module.exports = mongoose.model('Person', PersonSchema);

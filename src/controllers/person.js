@@ -77,8 +77,9 @@ module.exports.addStatus = async (req, res, next) => {
       statusId: req.body.statusId,
       startDate: moment(req.body.startDate, 'DD-MM-YYYY')
           .format('DD-MM-YYYY'),
-      endDate: moment(req.body.endDate, 'DD-MM-YYYY')
-          .format('DD-MM-YYYY'),
+      endDate: req.body.endDate !=='PERMANENT' ?
+              moment(req.body.endDate, 'DD-MM-YYYY').format('DD-MM-YYYY') :
+              'PERMANENT',
     };
     newStatus = await PersonRepository.addStatus(newStatus);
     res.status(201).json(newStatus);

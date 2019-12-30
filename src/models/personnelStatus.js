@@ -21,6 +21,9 @@ const personnelStatus = new mongoose.Schema(
             const start = moment(startDate, 'DD-MM-YYYY', true).format(
                 'YYYY-MM-DD',
             );
+            if (this.endDate === 'PERMANENT') {
+              return true;
+            }
             const end = moment(this.endDate, 'DD-MM-YYYY', true).format(
                 'YYYY-MM-DD',
             );
@@ -37,6 +40,9 @@ const personnelStatus = new mongoose.Schema(
         required: [true, 'End date is required'],
         validate: {
           validator: function(endDate) {
+            if (endDate === 'PERMANENT') {
+              return true;
+            }
             const start = moment(this.startDate, 'DD-MM-YYYY', true).format(
                 'YYYY-MM-DD',
             );

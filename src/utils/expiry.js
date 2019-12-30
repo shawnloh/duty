@@ -8,6 +8,9 @@ const moment = require('moment-timezone');
  * @return {Boolean} true/false
  */
 module.exports.statusBeforeToday = (endDate) => {
+  if (endDate === 'PERMANENT') {
+    return false;
+  }
   const sgDate = moment().tz('Asia/Singapore').format('YYYY-MM-DD');
   const now = moment(sgDate);
 

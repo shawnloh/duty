@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Promise = require('bluebird');
-const fs = require('fs');
 const path = require('path');
+const loadModules = require('../utils/loadmodules');
 const envConfigs = require('./config/config');
 
 // db seed
@@ -30,26 +30,10 @@ mongoose.set('useUnifiedTopology', true);
 const env = process.env.NODE_ENV || 'development';
 const config = envConfigs[env];
 mongoose.connect(config.url);
-
-const dbModels ={};
-const loadDbModels = (pathName) => {
-  const stat =fs.lstatSync(pathName);
-  if (stat.isDirectory()) {
-    const files = fs.readdirSync(pathName);
-    let f; const l = files.length;
-    for (let i = 0; i < l; i++) {
-      f = path.join(pathName, files[i]);
-      dbModels[`${i}`] = require(f);
-    }
-  } else {
-    dbModels['0'] = require(pathName);
-  }
-};
-
 // Init database index for unique
 const setupModelsIndex = async () => {
   try {
-    loadDbModels(path.join(__dirname, '..', 'models'));
+    const dbModels = loadModules(path.join(__dirname, '..', 'models'));
     await Promise.all(Object.keys(dbModels).map((key) => {
       return dbModels[key].init();
     }));

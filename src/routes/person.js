@@ -129,6 +129,9 @@ router.post('/status/:personId/add', [
       .notEmpty()
       .withMessage('End date is required')
       .custom((endDate) => {
+        if (endDate === 'PERMANENT') {
+          return true;
+        }
         if (!moment(endDate, 'DD-MM-YYYY', true).isValid()) {
           throw new Error(errorMessages.INVALID_END_DATE);
         }
@@ -163,7 +166,13 @@ router.route('/status/:personId/:personnelStatusId')
           .if(body('endDate').exists())
           .notEmpty()
           .withMessage('End date must not be empty')
+          .customSanitizer((value) => {
+            return value.toUpperCase();
+          })
           .custom((endDate) => {
+            if (endDate === 'PERMANENT') {
+              return true;
+            }
             if (!moment(endDate, 'DD-MM-YYYY', true).isValid()) {
               throw new Error(errorMessages.INVALID_END_DATE);
             }
@@ -214,6 +223,9 @@ router.post('/:personId/blockout', [
   body('endDate')
       .if(body('endDate').exists())
       .custom((value, {req}) => {
+        if (endDate === 'PERMANENT') {
+          return true;
+        }
         if (!moment(value, 'DD-MM-YYYY', true).isValid()) {
           throw new Error(errorMessages.INVALID_END_DATE);
         }
