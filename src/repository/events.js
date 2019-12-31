@@ -16,6 +16,20 @@ class EventRepository {
     return events;
   }
 
+  static async findById(eventId) {
+    const event = await Event
+        .findById(eventId)
+        .populate('pointSystem', '_id name')
+        .populate('personnels', '_id name')
+        .select('-createdAt -updatedAt -__v')
+        .lean()
+        .exec();
+    if (!event) {
+      return EventRepository.errors.INVALID_EVENT_ID;
+    }
+    return event;
+  }
+
   static async create(
       name=null, date, pointSystemId, pointsAllocation, personnels=[],
   ) {

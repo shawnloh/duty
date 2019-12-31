@@ -2,14 +2,25 @@ const EventRepository = require('../repository/events');
 const PersonRepository = require('../repository/person');
 
 // User view events
-// router.use(function timeLog(req, res, next) {
-//   console.log('Time: ', Date.now());
-//   next();
-// });
 module.exports.getAll = async (req, res, next) => {
   try {
     const events = await EventRepository.findAll();
     res.status(200).json(events);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.getOne = async (req, res, next) => {
+  try {
+    const {eventId} = req.params;
+    const event = await EventRepository.findById(eventId);
+    const errors = [];
+    if (event === EventRepository.errors.INVALID_EVENT_ID) {
+      errors.push('Invalid events id');
+      return res.status(400).json({errors});
+    }
+    res.status(200).json(event);
   } catch (error) {
     next(error);
   }
@@ -37,7 +48,8 @@ module.exports.create = async (req, res, next) => {
   }
 };
 
-
+// Generate a list of names given qty and
+// date and status not allowed / status only
 module.exports.generate = async (req, res, next) => {
   try {
     const {date, platoons, ranks, pointSystemId} = req.body;
@@ -109,3 +121,4 @@ module.exports.delete = async (req, res, next) => {
     next(error);
   }
 };
+

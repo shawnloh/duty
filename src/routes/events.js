@@ -129,6 +129,13 @@ router.use(auth);
 
 router.route('/')
     .get(eventsController.getAll);
+router.get('/:eventId', [
+  param('eventId')
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_EVENT_ID)
+      .bail()
+      .customSanitizer((val) => Types.ObjectId(val)),
+], eventsController.getOne);
 
 router.post('/delete/:eventId', [
   param('eventId')
