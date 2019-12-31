@@ -15,6 +15,7 @@ app.use('/api/status', require('./routes/status'));
 app.use('/api/points', require('./routes/points'));
 app.use('/api/ranks', require('./routes/ranks'));
 app.use('/api/platoons', require('./routes/platoons'));
+app.use('/api/engines', require('./routes/engine'));
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);
