@@ -32,7 +32,7 @@ class EventRepository {
       return EventRepository.errors.INVALID_POINT_SYSTEM_OR_PERSON_ID;
     }
 
-    const newEvent = new Event({
+    let newEvent = new Event({
       name,
       date,
       pointSystem: pointSystemId,
@@ -40,16 +40,47 @@ class EventRepository {
       personnels,
     });
     await newEvent.save({validateBeforeSave: true});
+    newEvent = await newEvent.populate('personnels', '_id name').execPopulate();
 
     await Promise.all(pPoints.map((point) => {
       point.points = point.points + pointsAllocation;
       return point.save();
     }));
+    return newEvent;
+  }
+
+  static async delete(eventId) {
+    let event = await Event.findById(eventId).exec();
+    if (!event) {
+      return EventRepository.errors.INVALID_EVENT_ID;
+    }
+    event = await event.remove();
+    return event;
+  }
+
+  static async revertAndDelete(eventId) {
+    let event = await Event.findById(eventId).exec();
+    if (!event) {
+      return EventRepository.errors.INVALID_EVENT_ID;
+    }
+    const pPoints = await PersonnelPoints.find(
+        {personId: {$in: event.personnels},
+          pointSystem: event.pointSystem},
+    ).exec();
+
+    await Promise.all(pPoints.map((point) => {
+      point.points = point.points - event.pointsAllocation;
+      return point.save();
+    }));
+
+    event = await event.remove();
+    return event;
   }
 }
 
 EventRepository.errors = {
   INVALID_POINT_SYSTEM_OR_PERSON_ID: 'INVALID_POINT_SYSTEM_OR_PERSON_ID',
+  INVALID_EVENT_ID: 'INVALID_EVENT_ID',
 };
 
 module.exports = EventRepository;

@@ -1,5 +1,5 @@
 const {Router} = require('express');
-const {body} = require('express-validator');
+const {body, param} = require('express-validator');
 const moment = require('moment-timezone');
 const eventsController = require('../controllers/events');
 const expressValidation = require('../middleware/expressValidation');
@@ -24,6 +24,7 @@ const errorMessages = {
   STATUS_NOT_ALLOWED: 'statusNotAllowed must contain at least 1 status',
   DATE_REQUIRED: 'date must be required',
   DATE_FORMAT: 'date must be in DD-MM-YYYY format',
+  INVALID_EVENT_ID: 'event id is invalid',
   numericOnly: function(title) {
     return `${title} ${this.NUMERIC_VALUE_ONLY}`;
   },
@@ -128,6 +129,20 @@ router.use(auth);
 
 router.route('/')
     .get(eventsController.getAll);
+
+router.post('/delete/:eventId', [
+  param('eventId')
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_EVENT_ID)
+      .bail()
+      .customSanitizer((val) => Types.ObjectId(val)),
+  body('revert')
+      .if(body('revert').exists())
+      .isBoolean()
+      .withMessage(errorMessages.booleanOnly('revert'))
+      .toBoolean(),
+  expressValidation,
+], eventsController.delete);
 
 router.post('/create', [
   body('name')

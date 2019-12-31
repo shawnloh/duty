@@ -1,5 +1,6 @@
 const EventRepository = require('../repository/events');
 const PersonRepository = require('../repository/person');
+
 // User view events
 // router.use(function timeLog(req, res, next) {
 //   console.log('Time: ', Date.now());
@@ -80,6 +81,30 @@ module.exports.generate = async (req, res, next) => {
     });
 
     res.status(200).json(persons);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.delete = async (req, res, next) => {
+  try {
+    const eventId = req.params.eventId;
+    const revert = req.body.revert;
+    let event;
+
+    if (revert) {
+      event = await EventRepository.revertAndDelete(eventId);
+    } else {
+      event = await EventRepository.delete(eventId);
+    }
+
+    const errors = [];
+    if (event === EventRepository.errors.INVALID_EVENT_ID) {
+      errors.push('Invalid event id');
+      return res.status(400).json({errors});
+    }
+
+    return res.status(200).json({success: true, event});
   } catch (error) {
     next(error);
   }
