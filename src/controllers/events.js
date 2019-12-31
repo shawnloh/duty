@@ -18,7 +18,22 @@ module.exports.getAll = async (req, res, next) => {
 // officers, automatically generate and allow user to reroll individual
 // personnels. User can choose to enable point awarded to confirmed personnel
 module.exports.create = async (req, res, next) => {
-  res.send('NOT IMPLEMENTED');
+  try {
+    const errors = [];
+    const {date, pointSystemId, pointAllocation, personnels} = req.body;
+    const name = req.body.name;
+
+    const event = await EventRepository.create(
+        name, date, pointSystemId, pointAllocation, personnels,
+    );
+    if (event === EventRepository.errors.INVALID_POINT_SYSTEM_OR_PERSON_ID) {
+      errors.push('Invalid point system or personnel id');
+      return res.status(400).json({errors});
+    }
+    res.status(201).json(event);
+  } catch (error) {
+    next(error);
+  }
 };
 
 
@@ -63,7 +78,6 @@ module.exports.generate = async (req, res, next) => {
       wsQty: wspecs,
       oQty: officers,
     });
-    // persons = PersonRepository.generator.filterByQuantity(persons, pioneers, wspecs, officers);
 
     res.status(200).json(persons);
   } catch (error) {
