@@ -4,10 +4,8 @@
     "es6": true,
     "node": true
   },
-  "extends": [
-    "google"
-  ],
-  "plugins": [],
+  "extends": ["google", "plugin:prettier/recommended"],
+  "plugins": ["prettier"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -17,6 +15,7 @@
   },
   "rules": {
     "new-cap": "off",
-    "require-jsdoc": "off"
+    "require-jsdoc": "off",
+    "prettier/prettier": "error"
   }
 }

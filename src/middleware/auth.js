@@ -1,38 +1,46 @@
-const jwt = require('jsonwebtoken');
-const Account = require('../models/account');
+const jwt = require("jsonwebtoken");
+const Account = require("../models/account");
 
 // auth checks for user that contains a valid token
 const auth = (req, res, next) => {
-  if (!req.header('Authorization')) {
+  if (!req.session || !req.session.user) {
     return res.status(401).send({
-      message: 'Not authorized to access this resource',
+      message: "Not authorized to access this resource"
     });
   }
+  next();
+  // if (!req.header("Authorization")) {
+  //   return res.status(401).send({
+  //     message: "Not authorized to access this resource"
+  //   });
+  // }
 
-  if (req.header('Authorization').indexOf('Bearer') == -1) {
-    return res.status(400).send({errors: ['Invalid token']});
-  }
+  // if (req.header("Authorization").indexOf("Bearer") == -1) {
+  //   return res.status(400).send({ errors: ["Invalid token"] });
+  // }
 
-  const token = req.header('Authorization').replace('Bearer ', '');
-  jwt.verify(token, process.env.JWT_KEY, {}, async (err, data) => {
-    try {
-      if (err) {
-        return res.status(400).send({errors: ['Invalid token']});
-      }
-      const user = await Account.findOne({
-        _id: data._id,
-        token: token,
-      });
-      if (!user) {
-        throw new Error();
-      }
-      req.user = user;
-      req.token = token;
-      next();
-    } catch (error) {
-      res.status(401).send({message: 'Not authorized to access this resource'});
-    }
-  });
+  // const token = req.header("Authorization").replace("Bearer ", "");
+  // jwt.verify(token, process.env.JWT_KEY, {}, async (err, data) => {
+  //   try {
+  //     if (err) {
+  //       return res.status(400).send({ errors: ["Invalid token"] });
+  //     }
+  //     const user = await Account.findOne({
+  //       _id: data._id,
+  //       token: token
+  //     });
+  //     if (!user) {
+  //       throw new Error();
+  //     }
+  //     req.user = user;
+  //     req.token = token;
+  //     next();
+  //   } catch (error) {
+  //     res
+  //       .status(401)
+  //       .send({ message: "Not authorized to access this resource" });
+  //   }
+  // });
 };
 
 module.exports = auth;
