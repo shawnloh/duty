@@ -7,6 +7,7 @@ module.exports.viewAll = async (req, res, next) => {
   try {
     const points = await Point.find({})
       .lean()
+      .select("_id name")
       .exec();
     res.status(200).json(points);
   } catch (error) {
@@ -55,10 +56,7 @@ module.exports.update = async (req, res, next) => {
 
     pointSystem.name = req.body.name;
     pointSystem = await pointSystem.save();
-    return res.status(200).json({
-      success: true,
-      pointSystem
-    });
+    return res.status(200).json(pointSystem);
   } catch (error) {
     next(error);
   }
@@ -73,7 +71,7 @@ module.exports.delete = async (req, res, next) => {
     pointSystem = await pointSystem.remove();
     return res.status(200).json({
       success: true,
-      pointSystem
+      deletedPointSystem: pointSystem
     });
   } catch (error) {
     next(error);
