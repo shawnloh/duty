@@ -24,8 +24,7 @@ module.exports.create = async (req, res, next) => {
 
 module.exports.update = async (req, res, next) => {
   try {
-    // let rank = await rank.findByID().exist(req.params.rankId);
-    let rank = await Rank.findById(req.params.rankId);
+    let rank = await Rank.findById(req.params.rankId).exec();
     if (!rank) {
       return res.status(400).json({ errors: ["Please provide a valid id"] });
     }
