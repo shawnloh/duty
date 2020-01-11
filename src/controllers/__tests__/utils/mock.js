@@ -7,5 +7,5 @@ const response = () => {
 };
 
 module.exports = {
-  response,
+  response
 };

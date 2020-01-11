@@ -18,7 +18,6 @@ module.exports.viewAll = async (req, res, next) => {
 module.exports.create = async (req, res, next) => {
   const newPointsSystem = {
     name: req.body.name,
-    group: req.body.group,
     statusNotAllowed: req.body.statusNotAllowed || [],
     onlyStatus: req.body.onlyStatus || false
   };

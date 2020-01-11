@@ -1,12 +1,12 @@
-const moment = require('moment-timezone');
+const moment = require("moment-timezone");
 
 const getAllDates = (startDate, endDate) => {
   const dates = [startDate];
-  const currDate = moment(startDate, 'DD-MM-YYYY').startOf('day');
-  const lastDate = moment(endDate, 'DD-MM-YYYY').startOf('day');
+  const currDate = moment(startDate, "DD-MM-YYYY").startOf("day");
+  const lastDate = moment(endDate, "DD-MM-YYYY").startOf("day");
 
-  while (currDate.add(1, 'days').diff(lastDate) < 0) {
-    dates.push(currDate.clone().format('DD-MM-YYYY'));
+  while (currDate.add(1, "days").diff(lastDate) < 0) {
+    dates.push(currDate.clone().format("DD-MM-YYYY"));
   }
 
   dates.push(endDate);
@@ -14,5 +14,5 @@ const getAllDates = (startDate, endDate) => {
 };
 
 module.exports = {
-  getAllDates,
+  getAllDates
 };

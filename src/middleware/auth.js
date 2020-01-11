@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const Account = require("../models/account");
+// const jwt = require("jsonwebtoken");
+// const Account = require("../models/account");
 
 // auth checks for user that contains a valid token
 const auth = (req, res, next) => {

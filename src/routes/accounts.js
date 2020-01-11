@@ -12,7 +12,11 @@ router.post(
   [
     body("username")
       .notEmpty()
-      .withMessage("Username is required"),
+      .withMessage("Username is required")
+      .bail()
+      .customSanitizer(val => {
+        return val.toLowerCase();
+      }),
     body("password")
       .notEmpty()
       .withMessage("Password is required"),

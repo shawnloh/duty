@@ -1,9 +1,9 @@
-const account = require('./account');
-const person = require('./person');
-const platoon = require('./platoon');
-const rank = require('./rank');
-const status = require('./status');
-const Promise = require('bluebird');
+const account = require("./account");
+const person = require("./person");
+const platoon = require("./platoon");
+const rank = require("./rank");
+const status = require("./status");
+const Promise = require("bluebird");
 
 module.exports.all = async () => {
   try {
@@ -11,11 +11,12 @@ module.exports.all = async () => {
       account.seed(),
       platoon.seed(),
       rank.seed(),
-      status.seed()]);
+      status.seed()
+    ]);
     await person.seed();
-    console.log('Successfully seed db');
+    console.log("Successfully seed db");
   } catch (error) {
-    console.error('error in seeding db', error);
+    console.error("error in seeding db", error);
   }
 };
 
@@ -25,10 +26,11 @@ module.exports.clearDB = async () => {
       account.clear(),
       platoon.clear(),
       rank.clear(),
-      status.clear()]);
+      status.clear()
+    ]);
     await person.clear();
-    console.log('Successfully clear db');
+    console.log("Successfully clear db");
   } catch (error) {
-    console.error('error in clearing db', error);
+    console.error("error in clearing db", error);
   }
 };

@@ -1,5 +1,5 @@
-const EventRepository = require('../repository/events');
-const PersonRepository = require('../repository/person');
+const EventRepository = require("../repository/events");
+const PersonRepository = require("../repository/person");
 
 // User view events
 module.exports.getAll = async (req, res, next) => {
@@ -13,12 +13,12 @@ module.exports.getAll = async (req, res, next) => {
 
 module.exports.getOne = async (req, res, next) => {
   try {
-    const {eventId} = req.params;
+    const { eventId } = req.params;
     const event = await EventRepository.findById(eventId);
     const errors = [];
     if (event === EventRepository.errors.INVALID_EVENT_ID) {
-      errors.push('Invalid events id');
-      return res.status(400).json({errors});
+      errors.push("Invalid events id");
+      return res.status(400).json({ errors });
     }
     res.status(200).json(event);
   } catch (error) {
@@ -32,15 +32,19 @@ module.exports.getOne = async (req, res, next) => {
 module.exports.create = async (req, res, next) => {
   try {
     const errors = [];
-    const {date, pointSystemId, pointAllocation, personnels} = req.body;
+    const { date, pointSystemId, pointAllocation, personnels } = req.body;
     const name = req.body.name;
 
     const event = await EventRepository.create(
-        name, date, pointSystemId, pointAllocation, personnels,
+      name,
+      date,
+      pointSystemId,
+      pointAllocation,
+      personnels
     );
     if (event === EventRepository.errors.INVALID_POINT_SYSTEM_OR_PERSON_ID) {
-      errors.push('Invalid point system or personnel id');
-      return res.status(400).json({errors});
+      errors.push("Invalid point system or personnel id");
+      return res.status(400).json({ errors });
     }
     res.status(201).json(event);
   } catch (error) {
@@ -52,7 +56,7 @@ module.exports.create = async (req, res, next) => {
 // date and status not allowed / status only
 module.exports.generate = async (req, res, next) => {
   try {
-    const {date, platoons, ranks, pointSystemId} = req.body;
+    const { date, platoons, ranks, pointSystemId } = req.body;
     const pioneers = req.body.pioneers || 0;
     const wspecs = req.body.wspecs || 0;
     const officers = req.body.officers || 0;
@@ -69,16 +73,16 @@ module.exports.generate = async (req, res, next) => {
 
     if (onlyStatus && statusNotAllowed.length > 0) {
       errors.push(
-          'onlyStatus can only be false when statusNotAllowed is provided',
+        "onlyStatus can only be false when statusNotAllowed is provided"
       );
-      return res.status(400).json({errors});
+      return res.status(400).json({ errors });
     }
 
     if (pioneers === 0 && wspecs === 0 && officers === 0) {
       errors.push(
-          'There must be at least 1 quantity from pioneers / wspecs / officers',
+        "There must be at least 1 quantity from pioneers / wspecs / officers"
       );
-      return res.status(400).json({errors});
+      return res.status(400).json({ errors });
     }
     const persons = await PersonRepository.Generator.generate({
       date,
@@ -89,7 +93,7 @@ module.exports.generate = async (req, res, next) => {
       onlyStatus,
       pQty: pioneers,
       wsQty: wspecs,
-      oQty: officers,
+      oQty: officers
     });
 
     res.status(200).json(persons);
@@ -112,13 +116,12 @@ module.exports.delete = async (req, res, next) => {
 
     const errors = [];
     if (event === EventRepository.errors.INVALID_EVENT_ID) {
-      errors.push('Invalid event id');
-      return res.status(400).json({errors});
+      errors.push("Invalid event id");
+      return res.status(400).json({ errors });
     }
 
-    return res.status(200).json({success: true, event});
+    return res.status(200).json({ success: true, event });
   } catch (error) {
     next(error);
   }
 };
-
