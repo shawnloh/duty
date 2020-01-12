@@ -19,7 +19,8 @@ const PersonSchema = new Schema(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      uppercase: true
     },
     blockOutDates: {
       type: [String],
