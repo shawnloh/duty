@@ -1,4 +1,6 @@
 const Platoon = require("../models/platoon");
+const Person = require("../models/person");
+const ObjectId = require("mongoose").Types.ObjectId;
 // const platoonValidator = require("../validators/platoonValidator");
 
 module.exports.viewAll = async (req, res, next) => {
@@ -42,6 +44,14 @@ module.exports.update = async (req, res, next) => {
 
 module.exports.delete = async (req, res, next) => {
   try {
+    const personnels = await Person.find({
+      platoon: ObjectId(req.params.platoonId)
+    }).exec();
+    if (personnels.length > 0) {
+      return res.status(400).json({
+        errors: ["Cannot delete platoon when personnels are assigned"]
+      });
+    }
     const deletedplatoon = await Platoon.findByIdAndDelete(
       req.params.platoonId
     ).exec();

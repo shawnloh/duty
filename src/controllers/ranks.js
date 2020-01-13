@@ -1,4 +1,6 @@
 const Rank = require("../models/rank");
+const Person = require("../models/person");
+const ObjectId = require("mongoose").Types.ObjectId;
 // const rankValidator = require("../validators/rankValidator");
 
 module.exports.viewAll = async (req, res, next) => {
@@ -41,6 +43,14 @@ module.exports.update = async (req, res, next) => {
 
 module.exports.delete = async (req, res, next) => {
   try {
+    const personnels = await Person.find({
+      rank: ObjectId(req.params.rankId)
+    }).exec();
+    if (personnels.length > 0) {
+      return res.status(400).json({
+        errors: ["Cannot delete platoon when personnels are assigned"]
+      });
+    }
     const deletedRank = await Rank.findByIdAndDelete(req.params.rankId).exec();
     if (!deletedRank) {
       return res.status(400).json({ errors: ["Please provide a valid id"] });
