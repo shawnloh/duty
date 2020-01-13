@@ -151,6 +151,7 @@ class PersonRepository {
   static async addStatus(newStatus) {
     let pStatus = new PersonnelStatus(newStatus);
     pStatus = await pStatus.save({ validateBeforeSave: true });
+    pStatus = await pStatus.populate("statusId", "_id name").execPopulate();
     return pStatus;
   }
 
