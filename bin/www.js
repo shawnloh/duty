@@ -1,5 +1,5 @@
-const app = require('../src/app');
-const mongoose = require('mongoose');
+const app = require("../src/app");
+const mongoose = require("mongoose");
 
 const port = process.env.PORT || 3000;
 
@@ -11,5 +11,5 @@ const gracefulShutDown = async () => {
   await mongoose.connection.close();
 };
 
-process.on('SIGTERM', gracefulShutDown);
-process.on('SIGINT', gracefulShutDown);
+process.on("SIGTERM", gracefulShutDown);
+process.on("SIGINT", gracefulShutDown);

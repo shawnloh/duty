@@ -1,4 +1,5 @@
 const Status = require("../models/status");
+const PersonnelStatus = require("../models/personnelStatus");
 
 module.exports.getAll = async (req, res, next) => {
   try {
@@ -25,6 +26,14 @@ module.exports.create = async (req, res, next) => {
 
 module.exports.delete = async (req, res, next) => {
   try {
+    const pStatus = await PersonnelStatus.findOne({
+      statusId: req.params.statusId
+    }).exec();
+    if (pStatus) {
+      return res.status(400).json({
+        errors: ["Unable to delete status while personnels are assigned"]
+      });
+    }
     const deletedStatus = await Status.findById(req.params.statusId).exec();
     if (!deletedStatus) {
       return res

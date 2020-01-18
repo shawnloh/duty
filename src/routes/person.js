@@ -11,7 +11,7 @@ const personController = require("../controllers/person");
 
 const errorMessages = {
   INVALID_START_DATE: "Invalid start date, DD-MM-YYYY format only",
-  INVALID_END_DATE: "Invalid end date, DD-MM-YYYY format only",
+  INVALID_END_DATE: "Invalid end date, DD-MM-YYYY format or PERMANENT only",
   INVALID_STATUS_ID: "Invalid status id",
   INVALID_RANK_ID: "Invalid rank id",
   INVALID_PLATOON_ID: "Invalid platoon id",
@@ -139,7 +139,11 @@ router.post(
     body("endDate")
       .notEmpty()
       .withMessage("End date is required")
+      .customSanitizer(value => {
+        return value.toUpperCase();
+      })
       .custom(endDate => {
+        console.log("end date", endDate);
         if (endDate === "PERMANENT") {
           return true;
         }
@@ -264,8 +268,8 @@ router.post(
   personController.addBlockDates
 );
 
-router.delete(
-  "/:personId/blockout",
+router.post(
+  "/:personId/blockout/delete",
   [
     param("personId")
       .isMongoId()
