@@ -42,10 +42,12 @@ module.exports.create = async (req, res, next) => {
       pointAllocation,
       personnels
     );
+
     if (event === EventRepository.errors.INVALID_POINT_SYSTEM_OR_PERSON_ID) {
       errors.push("Invalid point system or personnel id");
       return res.status(400).json({ errors });
     }
+
     res.status(201).json(event);
   } catch (error) {
     next(error);

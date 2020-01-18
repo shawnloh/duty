@@ -359,6 +359,10 @@ class PersonGenerator {
     const dayBeforeEvent = moment(date, "DD-MM-YYYY", true)
       .subtract(1, "d")
       .format("DD-MM-YYYY");
+    const dayAfterEvent = moment(date, "DD-MM-YYYY", true)
+      .add(1, "d")
+      .format("DD-MM-YYYY");
+
     const aggregations = [
       {
         $match: {
@@ -371,8 +375,8 @@ class PersonGenerator {
           rank: {
             $in: ranks
           },
-          lastEventDate: {
-            $ne: dayBeforeEvent
+          eventsDate: {
+            $nin: [dayBeforeEvent, dayAfterEvent, date]
           }
         }
       },
@@ -490,7 +494,8 @@ class PersonGenerator {
             }
           },
           statuses: { $first: "$statuses" },
-          blockOutDates: { $first: "$blockOutDates" }
+          blockOutDates: { $first: "$blockOutDates" },
+          eventsDate: { $first: "$eventsDate" }
         }
       },
       { $sort: { "point.points": 1 } },
@@ -518,7 +523,8 @@ class PersonGenerator {
               }
             }
           },
-          blockOutDates: 1
+          blockOutDates: 1,
+          eventsDate: 1
         }
       }
     );

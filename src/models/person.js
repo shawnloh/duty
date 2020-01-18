@@ -38,10 +38,11 @@ const PersonSchema = new Schema(
         ref: "PersonnelStatus"
       }
     ],
-    lastEventDate: {
-      type: String,
-      default: null
-    }
+    eventsDate: [
+      {
+        type: String
+      }
+    ]
   },
   { timestamps: true }
 );
