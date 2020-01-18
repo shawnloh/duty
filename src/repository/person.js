@@ -165,7 +165,7 @@ class PersonRepository {
     if (pStatus === PersonRepository.errors.NO_SUCH_STATUS) {
       return PersonRepository.errors.NO_SUCH_STATUS;
     }
-    if (!pStatus.personId.equals(person._id)) {
+    if (!pStatus.personId.equals(personId)) {
       return PersonRepository.errors.BAD_REQUEST;
     }
 

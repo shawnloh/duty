@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo")(session);
+const errorHandler = require("./middleware/errorHandler");
 require("./db/db");
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/points", require("./routes/points"));
 app.use("/api/ranks", require("./routes/ranks"));
 app.use("/api/platoons", require("./routes/platoons"));
 app.use("/api/engines", require("./routes/engine"));
+app.use(errorHandler.NOT_IMPLEMENTED);
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);

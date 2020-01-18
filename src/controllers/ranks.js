@@ -48,7 +48,7 @@ module.exports.delete = async (req, res, next) => {
     }).exec();
     if (personnels.length > 0) {
       return res.status(400).json({
-        errors: ["Cannot delete platoon when personnels are assigned"]
+        errors: ["Cannot delete rank when personnels are assigned"]
       });
     }
     const deletedRank = await Rank.findByIdAndDelete(req.params.rankId).exec();
