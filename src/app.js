@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo")(session);
+const path = require("path");
 const errorHandler = require("./middleware/errorHandler");
 require("./db/db");
 
@@ -34,7 +35,12 @@ app.use("/api/points", require("./routes/points"));
 app.use("/api/ranks", require("./routes/ranks"));
 app.use("/api/platoons", require("./routes/platoons"));
 app.use("/api/engines", require("./routes/engine"));
-app.use(errorHandler.NOT_IMPLEMENTED);
+app.use("/api/", errorHandler.NOT_IMPLEMENTED);
+
+app.use(express.static(path.join(__dirname, "frontend_duty", "build")));
+app.get("/*", function(req, res) {
+  res.sendFile(path.join(__dirname, "frontend_duty", "buld", "index.html"));
+});
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);
