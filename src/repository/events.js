@@ -73,7 +73,10 @@ class EventRepository {
     });
 
     await newEvent.save({ validateBeforeSave: true });
-    newEvent = await newEvent.populate("personnels", "_id name").execPopulate();
+    newEvent = await newEvent
+      .populate("personnels", "_id name")
+      .populate("pointSystem", "_id name")
+      .execPopulate();
 
     // await Promise.all(
     //   pPoints.map(point => {
