@@ -39,22 +39,24 @@ module.exports.login = async (req, res, next) => {
 
 module.exports.register = async (req, res, next) => {
   try {
-    if (req.user.role != "admin") {
+    const user = await Account.findOne({ _id: req.session.user._id }).exec();
+    if (user.role != "admin") {
       return res
         .status(401)
         .json({ errors: ["You need to be admin to register an account"] });
     }
     // const account = new Account(req.body);
     const account = await Account.create(req.body);
-    const token = await account.generateAuthToken();
-    res.status(201).json({ account, token });
+    // const token = await account.generateAuthToken();
+    res.status(201).json({ account });
   } catch (error) {
     next(error);
   }
 };
 
-module.exports.me = (req, res) => {
-  res.status(200).json(req.user);
+module.exports.me = async (req, res) => {
+  const user = await Account.findById(req.session.user._id).exec();
+  res.status(200).json(user);
 };
 
 module.exports.logout = async (req, res, next) => {
