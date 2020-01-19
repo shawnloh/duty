@@ -23,6 +23,9 @@
       "<rootDir>/tests/setupEnv.js"
     ]
   },
+  "engines": {
+    "node": "12.13.x"
+  },
   "dependencies": {
     "bcrypt": "^3.0.7",
     "bluebird": "^3.7.2",
