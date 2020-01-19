@@ -39,7 +39,7 @@ app.use("/api/", errorHandler.NOT_IMPLEMENTED);
 
 app.use(express.static(path.join(__dirname, "frontend_duty", "build")));
 app.get("/*", function(req, res) {
-  res.sendFile(path.join(__dirname, "frontend_duty", "buld", "index.html"));
+  res.sendFile(path.join(__dirname, "frontend_duty", "build", "index.html"));
 });
 
 app.use(function(err, req, res, next) {
