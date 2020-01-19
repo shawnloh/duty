@@ -37,9 +37,11 @@ app.use("/api/platoons", require("./routes/platoons"));
 app.use("/api/engines", require("./routes/engine"));
 app.use("/api/", errorHandler.NOT_IMPLEMENTED);
 
-app.use(express.static(path.join(__dirname, "frontend_duty", "build")));
+app.use(express.static(path.join(__dirname, "..", "frontend_duty", "build")));
 app.get("/*", function(req, res) {
-  res.sendFile(path.join(__dirname, "frontend_duty", "build", "index.html"));
+  res.sendFile(
+    path.join(__dirname, "..", "frontend_duty", "build", "index.html")
+  );
 });
 
 app.use(function(err, req, res, next) {
