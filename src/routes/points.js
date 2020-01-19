@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { body, param } = require("express-validator");
 const auth = require("../middleware/auth");
-const expressValidation = require("../middleware/expressValidation");
+const expressValidation = require("../middleware/expressvalidation");
 const errorHandler = require("../middleware/errorHandler");
 const pointsController = require("../controllers/points");
 

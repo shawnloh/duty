@@ -3,7 +3,7 @@ const { body, param } = require("express-validator");
 
 const platoonsController = require("../controllers/platoons");
 const auth = require("../middleware/auth");
-const expressValidation = require("../middleware/expressValidation");
+const expressValidation = require("../middleware/expressvalidation");
 const errorHandler = require("../middleware/errorHandler");
 
 const router = Router();
