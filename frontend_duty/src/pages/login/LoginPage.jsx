@@ -21,7 +21,8 @@ class LoginPage extends PureComponent {
     super(props);
     this.state = {
       username: '',
-      password: ''
+      password: '',
+      validateError: null
     };
   }
 
@@ -33,16 +34,31 @@ class LoginPage extends PureComponent {
     });
   };
 
+  checkValidation = () => {
+    const { username, password } = this.state;
+    if (username || password) {
+      this.setState({
+        validateError: 'Please provide valid username / password'
+      });
+    }
+  };
+
   handleSubmit = e => {
     e.preventDefault();
+    this.setState({
+      validateError: null
+    });
+
+    this.checkValidation();
     const { authenticate } = this.props;
     const { username, password } = this.state;
-    authenticate(username, password);
+    if (username !== '' && password !== '') authenticate(username, password);
   };
 
   checkError = () => {
     const { errors } = this.props;
-    if (errors.length > 0) {
+    const { validateError } = this.state;
+    if (errors.length > 0 || validateError) {
       return (
         <Row className="mx-auto mb-2">
           <ListGroup className="mx-auto">
@@ -53,6 +69,9 @@ class LoginPage extends PureComponent {
                 </ListGroupItem>
               );
             })}
+            {validateError && (
+              <ListGroupItem color="danger"> {validateError}</ListGroupItem>
+            )}
           </ListGroup>
         </Row>
       );
