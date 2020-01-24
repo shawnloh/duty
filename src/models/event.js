@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const moment = require("moment-timezone");
 const Schema = mongoose.Schema;
 
 const EventSchema = new Schema(
@@ -10,7 +11,15 @@ const EventSchema = new Schema(
     },
     date: {
       required: [true, "Date is required"],
-      type: String
+      type: String,
+      validate: {
+        validator: function(date) {
+          return moment(date, "DD-MM-YYYY", true).isValid();
+        },
+        message: function({ value }) {
+          return "date: " + value + " must be DD-MM-YYYY format";
+        }
+      }
     },
     pointSystem: {
       type: Schema.Types.ObjectId,
@@ -27,38 +36,6 @@ const EventSchema = new Schema(
         ref: "Person"
       }
     ]
-    // pioneerQuantity: {
-    //   type: Number,
-    //   required: [true, 'Pioneer(s) quantity is required'],
-    //   default: 0,
-    // },
-    // wspecsQuantity: {
-    //   type: Number,
-    //   required: [true, 'Specialist(s) quantity is required'],
-    //   default: 0,
-    // },
-    // officerQuantity: {
-    //   type: Number,
-    //   required: [true, 'Officer(s) quantity is required'],
-    //   default: 0,
-    // },
-
-    // statusNotAllowed: [{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Status',
-    // }],
-    // onlyStatus: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // platoons: [{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Platoon',
-    // }],
-    // ranks: [{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Rank',
-    // }],
   },
   { timestamps: true }
 );

@@ -17,7 +17,6 @@ const app = express();
 // set up logger using morgan
 app.use(morgan("combined"));
 app.use(helmet());
-app.use(mongoSanitize());
 app.set("trust proxy", 1);
 app.use(bodyParser.json());
 app.use(
@@ -40,6 +39,7 @@ const limiter = rateLimit({
   max: 150 // limit each IP to 100 requests per windowMs
 });
 
+app.use(mongoSanitize());
 app.use("/api/", limiter);
 app.use("/api/accounts", require("./routes/accounts"));
 app.use("/api/person", require("./routes/person"));
