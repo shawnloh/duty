@@ -33,8 +33,8 @@ class LoginPage extends PureComponent {
     });
   };
 
-  handleSubmit = () => {
-    window.event.preventDefault();
+  handleSubmit = e => {
+    e.preventDefault();
     const { authenticate } = this.props;
     const { username, password } = this.state;
     authenticate(username, password);

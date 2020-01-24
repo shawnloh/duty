@@ -190,7 +190,7 @@ function* refresh() {
     yield delay(threeMinute);
     const isAuth = yield select(state => state.auth.get('isAuthenticated'));
     if (isAuth) {
-      yield call(loadPersonnels);
+      yield call(loadEssentials);
     }
   }
 }
