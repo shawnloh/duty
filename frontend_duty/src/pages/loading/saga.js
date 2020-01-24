@@ -186,9 +186,12 @@ function* loadEssentials() {
 
 function* refresh() {
   while (true) {
-    const fiveMinute = 1000 * 60 * 5;
-    yield delay(fiveMinute);
-    yield call(loadPersonnels);
+    const threeMinute = 1000 * 60 * 3;
+    yield delay(threeMinute);
+    const isAuth = yield select(state => state.auth.get('isAuthenticated'));
+    if (isAuth) {
+      yield call(loadPersonnels);
+    }
   }
 }
 

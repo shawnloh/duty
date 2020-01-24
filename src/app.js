@@ -5,12 +5,15 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo")(session);
 const path = require("path");
+const helmet = require("helmet");
 const errorHandler = require("./middleware/errorHandler");
 require("./db/db");
 
 const app = express();
 // set up logger using morgan
 app.use(morgan("combined"));
+app.use(helmet());
+
 app.set("trust proxy", 1);
 app.use(bodyParser.json());
 app.use(
