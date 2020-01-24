@@ -11,6 +11,7 @@ require("./db/db");
 const app = express();
 // set up logger using morgan
 app.use(morgan("combined"));
+app.set("trust proxy", 1);
 app.use(bodyParser.json());
 app.use(
   session({
@@ -22,8 +23,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24,
-      path: "/"
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
