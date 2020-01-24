@@ -70,7 +70,6 @@ module.exports.logout = async (req, res, next) => {
       .clearCookie("dutyappsid", {
         domain: "btdutyapp.herokuapp.com",
         secure: process.env.NODE_ENV === "production",
-        domain: "btdutyapp.herokuapp.com",
         httpOnly: true
       })
       .status(200)
