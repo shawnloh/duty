@@ -101,7 +101,7 @@ class LoginPage extends PureComponent {
             {isLoading ? (
               <Spinner size="md" color="primary" />
             ) : (
-              <Button color="success" size="lg" className="w-100">
+              <Button color="success" type="submit" size="lg" className="w-100">
                 Login
               </Button>
             )}
