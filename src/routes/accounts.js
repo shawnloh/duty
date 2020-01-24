@@ -15,11 +15,11 @@ const accountLimiter = rateLimit({
   }
 });
 
-router.use(accountLimiter);
 router.post(
   "/login",
+  accountLimiter,
   [
-    body("username")
+    (body("username")
       .notEmpty()
       .withMessage("Username is required")
       .bail()
@@ -29,7 +29,7 @@ router.post(
     body("password")
       .notEmpty()
       .withMessage("Password is required"),
-    expressValidation
+    expressValidation)
   ],
   accountController.login
 );
