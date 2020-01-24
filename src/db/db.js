@@ -51,5 +51,11 @@ const setupModelsIndex = async () => {
   }
 };
 
-// initiate set up models indexing
-setupModelsIndex();
+const initDb = () => {
+  // initiate set up models indexing
+  setupModelsIndex();
+};
+
+module.exports = {
+  initDb
+};

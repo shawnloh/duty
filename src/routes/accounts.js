@@ -1,12 +1,19 @@
 const { Router } = require("express");
 const { body } = require("express-validator");
+const rateLimit = require("express-rate-limit");
 const auth = require("../middleware/auth");
 const errorHandler = require("../middleware/errorHandler");
 const expressValidation = require("../middleware/expressvalidation");
 const accountController = require("../controllers/accounts");
 
 const router = Router();
+const accountLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: 5, // start blocking after 5 requests
+  message: "Too many request from this IP, please try again after an hour"
+});
 
+router.use(accountLimiter);
 router.post(
   "/login",
   [
@@ -27,6 +34,7 @@ router.post(
 
 router.post(
   "/register",
+  accountLimiter,
   [
     auth,
     body("username")

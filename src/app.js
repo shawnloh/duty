@@ -6,14 +6,18 @@ const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo")(session);
 const path = require("path");
 const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const rateLimit = require("express-rate-limit");
 const errorHandler = require("./middleware/errorHandler");
-require("./db/db");
+const db = require("./db/db");
+
+db.initDb();
 
 const app = express();
 // set up logger using morgan
 app.use(morgan("combined"));
 app.use(helmet());
-
+app.use(mongoSanitize());
 app.set("trust proxy", 1);
 app.use(bodyParser.json());
 app.use(
@@ -24,13 +28,18 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
+      domain: "btdutyapp.herokuapp.com",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
-
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use("/api/", limiter);
 app.use("/api/accounts", require("./routes/accounts"));
 app.use("/api/person", require("./routes/person"));
 app.use("/api/events", require("./routes/events"));

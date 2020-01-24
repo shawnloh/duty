@@ -42,7 +42,7 @@ module.exports.register = async (req, res, next) => {
     const user = await Account.findOne({ _id: req.session.user._id }).exec();
     if (user.role != "admin") {
       return res
-        .status(401)
+        .status(403)
         .json({ errors: ["You need to be admin to register an account"] });
     }
     // const account = new Account(req.body);
