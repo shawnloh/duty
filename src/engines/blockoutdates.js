@@ -9,6 +9,9 @@ class BlockoutDateEngine {
       .format("DD-MM-YYYY");
 
     let persons = await Person.find({}).exec();
+    if (persons.length === 0) {
+      return Promise.resolve();
+    }
     persons = persons.map(person => {
       person.blockOutDates = person.blockOutDates.filter(date => {
         const currDate = moment(date, "DD-MM-YYYY", true);

@@ -8,6 +8,9 @@ class StatusEngine {
     const today = moment()
       .tz("Asia/Singapore")
       .format("DD-MM-YYYY");
+    if (pStatus.length === 0) {
+      return Promise.resolve();
+    }
 
     const removeStatus = pStatus.filter(status => {
       const endDate = moment(status.endDate, "DD-MM-YYYY", true);
