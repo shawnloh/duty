@@ -36,7 +36,7 @@ class LoginPage extends PureComponent {
 
   checkValidation = () => {
     const { username, password } = this.state;
-    if (username || password) {
+    if (!username || !password) {
       this.setState({
         validateError: 'Please provide valid username / password'
       });
