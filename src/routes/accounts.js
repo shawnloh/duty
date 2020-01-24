@@ -10,7 +10,9 @@ const router = Router();
 const accountLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour window
   max: 5, // start blocking after 5 requests
-  message: "Too many request from this IP, please try again after an hour"
+  message: {
+    errors: ["Too many request from this IP, please try again after an hour"]
+  }
 });
 
 router.use(accountLimiter);
