@@ -67,7 +67,11 @@ module.exports.logout = async (req, res, next) => {
     ).exec();
     await req.session.destroy();
     res
-      .clearCookie("dutyappsid")
+      .clearCookie("dutyappsid", {
+        secure: process.env.NODE_ENV === "production",
+        domain: "btdutyapp.herokuapp.com",
+        httpOnly: true
+      })
       .status(200)
       .json({ message: "Successfully logged out." });
   } catch (error) {
