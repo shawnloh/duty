@@ -5,11 +5,11 @@ const EventsEngine = require("../engines/events");
 
 module.exports.purgeAll = async (req, res, next) => {
   try {
-    await Promise.all(
+    await Promise.all([
       BlockoutDateEngine.purge(),
       StatusEngine.purge(),
       EventsEngine.purge()
-    );
+    ]);
     res.status(200).json({ message: "Successfully purge all" });
   } catch (error) {
     next(error);
