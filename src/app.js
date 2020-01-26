@@ -14,12 +14,13 @@ const db = require("./db/db");
 db.initDb();
 
 const app = express();
-
+app.set("trust proxy", 1);
 // set up cors
 const whitelistDomains = [
   "https://btdutyapp.betterwith.tech",
   "https://btdutybackend.betterwith.tech"
 ];
+
 const corsOptions = {
   origin: function(origin, callback) {
     if (whitelistDomains.indexOf(origin) !== -1) {
@@ -36,7 +37,6 @@ app.use(cors(corsOptions));
 // set up logger using morgan
 app.use(morgan("combined"));
 app.use(helmet());
-app.set("trust proxy", 1);
 app.use(bodyParser.json());
 app.use(
   session({
