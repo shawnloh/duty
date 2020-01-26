@@ -22,14 +22,17 @@ const envConfigs = require("./config/config");
 mongoose.Promise = Promise;
 
 // setting up mongoose connection
-mongoose.set("useNewUrlParser", true);
-mongoose.set("useFindAndModify", false);
-mongoose.set("useCreateIndex", true);
-mongoose.set("useUnifiedTopology", true);
+const initiateConnection = () => {
+  mongoose.set("useNewUrlParser", true);
+  mongoose.set("useFindAndModify", false);
+  mongoose.set("useCreateIndex", true);
+  mongoose.set("useUnifiedTopology", true);
 
-const env = process.env.NODE_ENV || "development";
-const config = envConfigs[env];
-mongoose.connect(config.url);
+  const env = process.env.NODE_ENV || "development";
+  const config = envConfigs[env];
+  mongoose.connect(config.url);
+};
+
 // Init database index for unique
 const setupModelsIndex = async () => {
   try {
@@ -41,7 +44,7 @@ const setupModelsIndex = async () => {
     );
 
     console.log("Finished models indexing");
-    if (env == "development") {
+    if (process.env.NODE_ENV == "development") {
       // await seed.clearDB();
       // await seed.all();
     }
@@ -52,6 +55,7 @@ const setupModelsIndex = async () => {
 };
 
 const initDb = () => {
+  initiateConnection();
   // initiate set up models indexing
   setupModelsIndex();
 };

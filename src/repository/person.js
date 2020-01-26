@@ -339,7 +339,6 @@ class PersonGenerator {
     pioneers = this.generateByPoints(pioneers, pQty);
     ws = this.generateByPoints(ws, wsQty);
     officers = this.generateByPoints(officers, oQty);
-
     persons = []
       .concat(pioneers)
       .concat(ws)
@@ -545,20 +544,20 @@ class PersonGenerator {
   }
 
   static generateByPoints(personnels = [], qty = 0) {
+    if (qty === 0) return [];
+
     let requiredQty = qty;
     let choosenPersonnels = [];
     const persons = _.groupBy(personnels, person => person.point.points);
     const sortedKeys = Object.keys(persons).sort((a, b) => a - b);
-    // console.log(persons);
 
-    for (let index = 0; index < sortedKeys.length; index++) {
-      const key = sortedKeys[index];
+    for (const key of sortedKeys) {
       const personsArray = persons[key];
-
       // if the first array in persons (which is the lowest point sorted by key)
       // it means all persons[key] will be apply and return
+
       if (personsArray.length === requiredQty) {
-        choosenPersonnels = choosenPersonnels.concat(personsArray);
+        choosenPersonnels = [...choosenPersonnels, ...personsArray];
         break;
       }
 

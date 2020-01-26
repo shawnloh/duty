@@ -58,20 +58,19 @@ module.exports.create = async (req, res, next) => {
 // date and status not allowed / status only
 module.exports.generate = async (req, res, next) => {
   try {
-    const { date, platoons, ranks, pointSystemId } = req.body;
-    const pioneers = req.body.pioneers || 0;
-    const wspecs = req.body.wspecs || 0;
-    const officers = req.body.officers || 0;
-    let statusNotAllowed = [];
-    let onlyStatus = false;
-    const errors = [];
+    const {
+      date,
+      platoons,
+      ranks,
+      pointSystemId,
+      pioneers = 0,
+      wspecs = 0,
+      officers = 0,
+      statusNotAllowed = [],
+      onlyStatus = false
+    } = req.body;
 
-    if (req.body.statusNotAllowed && req.body.statusNotAllowed.length > 0) {
-      statusNotAllowed = req.body.statusNotAllowed;
-    }
-    if (req.body.onlyStatus) {
-      onlyStatus = req.body.onlyStatus;
-    }
+    const errors = [];
 
     if (onlyStatus && statusNotAllowed.length > 0) {
       errors.push(
@@ -86,6 +85,7 @@ module.exports.generate = async (req, res, next) => {
       );
       return res.status(400).json({ errors });
     }
+
     const persons = await PersonRepository.Generator.generate({
       date,
       platoons,

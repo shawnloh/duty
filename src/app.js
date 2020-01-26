@@ -20,6 +20,17 @@ app.set("trust proxy", 1);
 app.use(morgan("combined"));
 app.use(helmet());
 app.use(bodyParser.json());
+const cookie = {
+  httpOnly: true,
+  maxAge: 1000 * 60 * 60 * 24,
+  secure: false
+};
+
+if (process.env.NODE_ENV === "production") {
+  cookie.secure = true;
+  cookie["domain"] = "btdutyapp.herokuapp.com";
+}
+
 app.use(
   session({
     name: "dutyappsid",
@@ -27,12 +38,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
-    cookie: {
-      domain: "btdutyapp.herokuapp.com",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24
-    }
+    cookie
   })
 );
 const limiter = rateLimit({

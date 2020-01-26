@@ -80,15 +80,18 @@ const generatorValidator = () => {
     body("pioneers")
       .if(body("pioneers").exists())
       .isNumeric({ no_symbols: true })
-      .withMessage(errorMessages.numericOnly("pioneers")),
+      .withMessage(errorMessages.numericOnly("pioneers"))
+      .toInt(),
     body("wspecs")
       .if(body("wspecs").exists())
       .isNumeric({ no_symbols: true })
-      .withMessage(errorMessages.numericOnly("wspecs")),
+      .withMessage(errorMessages.numericOnly("wspecs"))
+      .toInt(),
     body("officers")
       .if(body("officers").exists())
       .isNumeric({ no_symbols: true })
-      .withMessage(errorMessages.numericOnly("officers")),
+      .withMessage(errorMessages.numericOnly("officers"))
+      .toInt(),
     body().custom((value, { req }) => {
       if (!req.body.pioneers && !req.body.wspecs && !req.body.officers) {
         throw new Error(errorMessages.REQUIRED_QUANTITY);
@@ -120,6 +123,7 @@ const generatorValidator = () => {
         }
         return true;
       })
+      .toBoolean()
   ];
 };
 

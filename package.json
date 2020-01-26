@@ -37,6 +37,7 @@
     "express-rate-limit": "^5.0.0",
     "express-session": "^1.17.0",
     "express-validator": "^6.3.0",
+    "google-spreadsheet": "^2.0.8",
     "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
