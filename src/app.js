@@ -46,7 +46,7 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
-      domain: "betterwith.tech",
+      domain: ".betterwith.tech",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
