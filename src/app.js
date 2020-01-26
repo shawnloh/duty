@@ -16,7 +16,10 @@ db.initDb();
 const app = express();
 
 // set up cors
-const whitelistDomains = ["https://btdutyapp.now.sh"];
+const whitelistDomains = [
+  "https://btdutyapp.betterwith.tech",
+  "https://btdutybackend.betterwith.tech"
+];
 const corsOptions = {
   origin: function(origin, callback) {
     if (whitelistDomains.indexOf(origin) !== -1) {
@@ -43,7 +46,7 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
-      // domain: "btdutyapp.now.sh",
+      domain: ".betterwith.tech",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
