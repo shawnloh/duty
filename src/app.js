@@ -46,7 +46,7 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
-      domain: ".betterwith.tech",
+      domain: "betterwith.tech",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
@@ -55,7 +55,7 @@ app.use(
 );
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 150 // limit each IP to 100 requests per windowMs
+  max: 150 // limit each IP to 150 requests per windowMs
 });
 
 app.use(mongoSanitize());
