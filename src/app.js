@@ -7,12 +7,29 @@ const MongoStore = require("connect-mongo")(session);
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const db = require("./db/db");
 
 db.initDb();
 
 const app = express();
+
+// set up cors
+const whitelistDomains = ["https://btdutyapp.now.sh"];
+const corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelistDomains.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
 // set up logger using morgan
 app.use(morgan("combined"));
 app.use(helmet());
