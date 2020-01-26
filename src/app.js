@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo")(session);
-const path = require("path");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
@@ -27,7 +26,7 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
-      domain: "btdutyapp.herokuapp.com",
+      domain: "btdutyapp.now.sh",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
@@ -49,14 +48,7 @@ app.use("/api/points", require("./routes/points"));
 app.use("/api/ranks", require("./routes/ranks"));
 app.use("/api/platoons", require("./routes/platoons"));
 app.use("/api/engines", require("./routes/engine"));
-app.use("/api/", errorHandler.NOT_IMPLEMENTED);
-
-app.use(express.static(path.join(__dirname, "..", "frontend_duty", "build")));
-app.get("/*", function(req, res) {
-  res.sendFile(
-    path.join(__dirname, "..", "frontend_duty", "build", "index.html")
-  );
-});
+app.use("/*", errorHandler.NOT_IMPLEMENTED);
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);
