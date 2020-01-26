@@ -7,34 +7,16 @@ const MongoStore = require("connect-mongo")(session);
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
-const cors = require("cors");
+const path = require("path");
 const errorHandler = require("./middleware/errorHandler");
 const db = require("./db/db");
 
 db.initDb();
 
 const app = express();
-app.set("trust proxy", 1);
-// set up cors
-const whitelistDomains = [
-  "https://btdutyapp.betterwith.tech",
-  "https://btdutybackend.betterwith.tech"
-];
-
-const corsOptions = {
-  origin: function(origin, callback) {
-    if (whitelistDomains.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-};
-
-app.use(cors(corsOptions));
 
 // set up logger using morgan
+app.set("trust proxy", 1);
 app.use(morgan("combined"));
 app.use(helmet());
 app.use(bodyParser.json());
@@ -46,7 +28,7 @@ app.use(
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || "LALALAVERYSECRET",
     cookie: {
-      // domain: ".betterwith.tech",
+      domain: "btdutyapp.herokuapp.com",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24
@@ -68,7 +50,12 @@ app.use("/api/points", require("./routes/points"));
 app.use("/api/ranks", require("./routes/ranks"));
 app.use("/api/platoons", require("./routes/platoons"));
 app.use("/api/engines", require("./routes/engine"));
-app.use("/*", errorHandler.NOT_IMPLEMENTED);
+app.use("/api/", errorHandler.NOT_IMPLEMENTED);
+
+app.use(express.static(path.join(__dirname, "..", "public")));
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);
