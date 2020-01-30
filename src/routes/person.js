@@ -246,9 +246,6 @@ router.post(
     body("endDate")
       .if(body("endDate").exists())
       .custom((value, { req }) => {
-        if (endDate === "PERMANENT") {
-          return true;
-        }
         if (!moment(value, "DD-MM-YYYY", true).isValid()) {
           throw new Error(errorMessages.INVALID_END_DATE);
         }
