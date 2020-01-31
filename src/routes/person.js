@@ -214,7 +214,8 @@ router
       .notEmpty()
       .withMessage("Please provide a points to update personnel")
       .isNumeric({ no_symbols: true })
-      .withMessage("Please provide only numeric number for point"),
+      .withMessage("Please provide only numeric number for point")
+      .toInt(),
     expressValidation
   ])
   .put(personController.updatePoint);
