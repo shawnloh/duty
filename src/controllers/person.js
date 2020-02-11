@@ -196,8 +196,12 @@ module.exports.removeBlockoutDate = async (req, res, next) => {
   try {
     const errors = [];
     const { personId } = req.params;
-    const { date } = req.body;
-    const person = await PersonRepository.removeBlockout(personId, date);
+    const { startDate, endDate = null } = req.body;
+    const person = await PersonRepository.removeBlockout(
+      personId,
+      startDate,
+      endDate
+    );
     if (person === PersonRepository.errors.NO_SUCH_PERSON) {
       errors.push("Please provide a valid person id");
       return res.status(400).json({ errors });

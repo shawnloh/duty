@@ -272,12 +272,31 @@ router.post(
     param("personId")
       .isMongoId()
       .withMessage(errorMessages.INVALID_PERSON_ID),
-    body("date")
+    body("startDate")
       .notEmpty()
-      .withMessage("Date is required to remove blockout")
+      .withMessage("startDate is required to remove blockout")
+      .bail()
       .custom(value => {
+        console.log(value);
         if (!moment(value, "DD-MM-YYYY", true).isValid()) {
           throw new Error(errorMessages.INVALID_DATE);
+        }
+        return true;
+      }),
+    body("endDate")
+      .if(body("endDate").exists())
+      .custom((value, { req }) => {
+        if (!moment(value, "DD-MM-YYYY", true).isValid()) {
+          throw new Error(errorMessages.INVALID_END_DATE);
+        }
+        if (!req.body.startDate) {
+          throw new Error("startDate must exist if endDate is provided");
+        }
+        const startDate = moment(req.body.startDate, "DD-MM-YYYY", true);
+        const endDate = moment(value, "DD-MM-YYYY", true);
+
+        if (startDate.isSameOrAfter(endDate)) {
+          throw new Error(errorMessages.INVALID_END_DATE_BEFORE_START_DATE);
         }
         return true;
       }),

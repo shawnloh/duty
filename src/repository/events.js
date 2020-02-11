@@ -43,7 +43,6 @@ class EventRepository {
         .format("DD-MM-YYYY");
       name = `${today}-${point.name}`;
     }
-
     await Promise.all([
       PersonnelPoints.updateMany(
         {
@@ -58,9 +57,7 @@ class EventRepository {
         {
           _id: { $in: personnels }
         },
-        {
-          $push: { eventsDate: date }
-        }
+        { $addToSet: { eventsDate: date } }
       ).exec()
     ]);
 
@@ -132,11 +129,74 @@ class EventRepository {
     event = await event.remove();
     return event;
   }
+
+  static async changePersonnels(eventId, newPersonnels) {
+    let event = await Event.findById(eventId)
+      .select("-createdAt -updatedAt -__v")
+      .exec();
+    if (!event) {
+      return EventRepository.errors.INVALID_EVENT_ID;
+    }
+
+    const persons = await Person.find({ _id: { $in: newPersonnels } });
+    if (persons.length !== newPersonnels.length) {
+      return EventRepository.errors.CONTAINS_INVALID_PERSON_ID;
+    }
+    /**
+     * Revert all old personnels to default state
+     */
+
+    await Promise.all([
+      PersonnelPoints.updateMany(
+        {
+          personId: { $in: event.personnels },
+          pointSystem: event.pointSystem
+        },
+        {
+          $inc: { points: -event.pointsAllocation }
+        }
+      ).exec(),
+      Person.updateMany(
+        {
+          _id: { $in: event.personnels },
+          eventsDate: event.date
+        },
+        {
+          $pull: { eventsDate: event.date }
+        }
+      ).exec()
+    ]);
+    await Promise.all([
+      PersonnelPoints.updateMany(
+        {
+          personId: { $in: newPersonnels },
+          pointSystem: event.pointSystem
+        },
+        {
+          $inc: { points: event.pointsAllocation }
+        }
+      ).exec(),
+      Person.updateMany(
+        {
+          _id: { $in: newPersonnels }
+        },
+        { $addToSet: { eventsDate: event.date } }
+      ).exec()
+    ]);
+    event.personnels = newPersonnels;
+    event = await event.save({ validateBeforeSave: true });
+    event = await event
+      .populate("personnels", "_id name")
+      .populate("pointSystem", "_id name")
+      .execPopulate();
+    return event;
+  }
 }
 
 EventRepository.errors = {
   INVALID_POINT_SYSTEM_OR_PERSON_ID: "INVALID_POINT_SYSTEM_OR_PERSON_ID",
-  INVALID_EVENT_ID: "INVALID_EVENT_ID"
+  INVALID_EVENT_ID: "INVALID_EVENT_ID",
+  CONTAINS_INVALID_PERSON_ID: "CONTAINS_INVALID_PERSON_ID"
 };
 
 module.exports = EventRepository;

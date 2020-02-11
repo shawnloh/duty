@@ -259,21 +259,55 @@ class PersonRepository {
         }
       })
       .populate("rank", "-createdAt -updatedAt -__v")
-      .populate("platoon", "-createdAt")
+      .populate("platoon", "-createdAt -updatedAt -__v")
       .exec();
     return person;
   }
 
-  static async removeBlockout(personId, dateToRemove) {
+  static async removeBlockout(personId, startDate, endDate = null) {
     let person = await this.findById(personId);
     if (!person) {
       return PersonRepository.errors.NO_SUCH_PERSON;
     }
-    if (person.blockOutDates.indexOf(dateToRemove) < 0) {
+    if (!endDate && person.blockOutDates.indexOf(startDate) < 0) {
       return PersonRepository.errors.NOT_MODIFIED;
     }
-    person.blockOutDates.pull(dateToRemove);
-    person = await person.save();
+
+    let datesToRemove = [startDate];
+    if (endDate) {
+      datesToRemove = datesToRemove.concat(
+        dates.getAllDates(startDate, endDate)
+      );
+    }
+
+    person = Person.findOneAndUpdate(
+      { _id: person._id },
+      { $pull: { blockOutDates: { $in: datesToRemove } } },
+      { new: true }
+    )
+      .populate({
+        path: "points",
+        select: "-personId -__v -createdAt -updatedAt",
+        populate: {
+          path: "pointSystem",
+          model: "Point",
+          select: "_id name"
+        }
+      })
+      .populate({
+        path: "statuses",
+        select: "-personId -__v -createdAt -updatedAt",
+        populate: {
+          path: "statusId",
+          model: "Status",
+          select: "_id name"
+        }
+      })
+      .populate("rank", "-createdAt -updatedAt -__v")
+      .populate("platoon", "-createdAt -updatedAt -__v")
+      .exec();
+    // person.blockOutDates.pull(dateToRemove);
+    // person = await person.save();
     return person;
   }
 }

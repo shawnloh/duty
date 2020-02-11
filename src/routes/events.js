@@ -131,17 +131,6 @@ const router = Router();
 router.use(auth);
 
 router.route("/").get(eventsController.getAll);
-router.get(
-  "/:eventId",
-  [
-    param("eventId")
-      .isMongoId()
-      .withMessage(errorMessages.INVALID_EVENT_ID)
-      .bail()
-      .customSanitizer(val => Types.ObjectId(val))
-  ],
-  eventsController.getOne
-);
 
 router.post(
   "/delete/:eventId",
@@ -159,6 +148,43 @@ router.post(
     expressValidation
   ],
   eventsController.delete
+);
+
+router.post(
+  "/:eventId/changepersonnels",
+  [
+    param("eventId")
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_EVENT_ID)
+      .bail()
+      .customSanitizer(val => Types.ObjectId(val)),
+    body("personnels")
+      .notEmpty()
+      .withMessage(errorMessages.PERSONNEL_REQUIRED)
+      .isArray({ min: 1 })
+      .withMessage(errorMessages.PERSONNEL_REQUIRED),
+    body("personnels.*")
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_PERSONNEL_ID)
+      .bail()
+      .customSanitizer(value => {
+        return Types.ObjectId(value);
+      }),
+    expressValidation
+  ],
+  eventsController.changePersonnels
+);
+
+router.get(
+  "/:eventId",
+  [
+    param("eventId")
+      .isMongoId()
+      .withMessage(errorMessages.INVALID_EVENT_ID)
+      .bail()
+      .customSanitizer(val => Types.ObjectId(val))
+  ],
+  eventsController.getOne
 );
 
 router.post(

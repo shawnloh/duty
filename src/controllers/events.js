@@ -127,3 +127,29 @@ module.exports.delete = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports.changePersonnels = async (req, res, next) => {
+  try {
+    const eventId = req.params.eventId;
+    const newPersonnels = req.body.personnels;
+    const event = await EventRepository.changePersonnels(
+      eventId,
+      newPersonnels
+    );
+
+    const errors = [];
+    if (event === EventRepository.errors.INVALID_EVENT_ID) {
+      errors.push("Invalid event id");
+      return res.status(400).json({ errors });
+    }
+
+    if (event === EventRepository.errors.CONTAINS_INVALID_PERSON_ID) {
+      errors.push("Contains invalid person id");
+      return res.status(400).json({ errors });
+    }
+
+    return res.status(200).json(event);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -14,6 +14,7 @@ module.exports.purgeAll = async (req, res, next) => {
     ]);
     res.status(200).json({ message: "Successfully purge all" });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
