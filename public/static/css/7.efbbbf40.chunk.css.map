@@ -1,0 +1,1 @@
+{"version":3,"sources":["pagination.css"],"names":[],"mappings":"AAIA,mDACE,cACF","file":"7.efbbbf40.chunk.css","sourcesContent":[".page-item.active .page-link {\n  cursor: pointer;\n}\n\n.page-item .page-link {\n  cursor: pointer;\n}\n"]}
